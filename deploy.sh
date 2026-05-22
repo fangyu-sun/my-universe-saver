@@ -14,7 +14,13 @@ fi
 
 echo "🔨 正在编译 MyUniverse.saver..."
 rm -rf MyUniverse.saver/Contents/MacOS/MyUniverse
-swiftc -o MyUniverse.saver/Contents/MacOS/MyUniverse -emit-library -Xlinker -bundle Sources/MyUniverseView.swift Sources/ConfigureSheetController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
+echo "🔨 正在为 x86_64 架构编译..."
+swiftc -target x86_64-apple-macos11.0 -o MyUniverse_x86_64 -emit-library -Xlinker -bundle Sources/MyUniverseView.swift Sources/ConfigureSheetController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
+echo "🔨 正在为 arm64 架构编译..."
+swiftc -target arm64-apple-macos11.0 -o MyUniverse_arm64 -emit-library -Xlinker -bundle Sources/MyUniverseView.swift Sources/ConfigureSheetController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
+echo "🧬 正在合成 Universal Binary..."
+lipo -create -output MyUniverse.saver/Contents/MacOS/MyUniverse MyUniverse_x86_64 MyUniverse_arm64
+rm MyUniverse_x86_64 MyUniverse_arm64
 
 # 更新外层 Bundle 的时间戳，以便 Finder 和系统设置能正确识别到修改时间
 touch MyUniverse.saver
