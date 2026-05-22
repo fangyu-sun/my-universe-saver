@@ -194,7 +194,7 @@ class ConfigureSheetController: NSObject, NSComboBoxDataSource, NSComboBoxDelega
         }
     }
     
-    override func controlTextDidChange(_ obj: Notification) {
+    func controlTextDidChange(_ obj: Notification) {
         guard let comboBox = obj.object as? NSComboBox, comboBox == cityComboBox else { return }
         let query = comboBox.stringValue.lowercased()
         
@@ -205,10 +205,6 @@ class ConfigureSheetController: NSObject, NSComboBoxDataSource, NSComboBoxDelega
         }
         
         comboBox.reloadData()
-        // Keep popup open while typing
-        if !comboBox.isExpanded {
-            comboBox.isExpanded = true
-        }
     }
 
     @objc private func fetchIPLocation() {
@@ -236,7 +232,7 @@ class ConfigureSheetController: NSObject, NSComboBoxDataSource, NSComboBoxDelega
                     }
                 }
             } catch {
-                DispatchQueue.main.async { self?.currentCityLabel.stringValue = "Current Location: Parse Error" }
+                DispatchQueue.main.async { self.currentCityLabel.stringValue = "Current Location: Parse Error" }
             }
         }
         task.resume()
