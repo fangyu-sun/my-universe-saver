@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "astronomy-engine": "^2.1.19",
+    "cities.json": "^1.1.50",
     "satellite.js": "^4.1.4"
   }
 }
