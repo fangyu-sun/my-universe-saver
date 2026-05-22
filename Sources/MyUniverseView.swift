@@ -71,6 +71,23 @@ class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
         let webConfiguration = WKWebViewConfiguration()
         webConfiguration.preferences.setValue(true, forKey: "developerExtrasEnabled")
         
+        let userContentController = WKUserContentController()
+        let scriptSource = """
+        window.zenithSettings = {
+            mode: 'screensaver',
+            lat: '\(lat)',
+            lon: '\(lon)',
+            city: '\(city)',
+            lang: '\(lang)',
+            fontSize: '\(fontSize)',
+            brightness: '\(brightness)',
+            refreshRate: '\(refreshRate)'
+        };
+        """
+        let userScript = WKUserScript(source: scriptSource, injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        userContentController.addUserScript(userScript)
+        webConfiguration.userContentController = userContentController
+        
         let newWebView = WKWebView(frame: self.bounds, configuration: webConfiguration)
         newWebView.autoresizingMask = [.width, .height]
         newWebView.setValue(false, forKey: "drawsBackground")
@@ -80,13 +97,9 @@ class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
         self.webView = newWebView
         
         if let htmlURL = Bundle(for: MyUniverseView.self).url(forResource: "index", withExtension: "html", subdirectory: "dist") {
-            var urlComponents = URLComponents(url: htmlURL, resolvingAgainstBaseURL: false)!
-            let encodedCity = city.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "Saved"
-            urlComponents.fragment = "mode=screensaver&lat=\(lat)&lon=\(lon)&city=\(encodedCity)&lang=\(lang)&fontSize=\(fontSize)&brightness=\(brightness)&refreshRate=\(refreshRate)"
-            
             webView?.isHidden = false
             errorLabel?.isHidden = true
-            newWebView.loadFileURL(urlComponents.url!, allowingReadAccessTo: htmlURL.deletingLastPathComponent())
+            newWebView.loadFileURL(htmlURL, allowingReadAccessTo: htmlURL.deletingLastPathComponent())
         } else {
             showFallbackMessage("MISSING LOCAL RESOURCES")
         }
