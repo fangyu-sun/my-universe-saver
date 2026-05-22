@@ -1,71 +1,83 @@
-# 🌌 宇宙天顶播报器 / Zenith Cosmic Broadcaster
+# 🌌 My Universe Saver / 宇宙天顶播报器屏保
 
 <p align="center">
-  <strong>一款唯美、深邃且实时的宇宙呼吸雷达。通过地理定位与物理轨道推算，在一个 60° 穹顶下循环为您播报正陪伴您的那颗星星。即使孤独，至少有一颗星星陪着你。</strong><br>
-  <em>A beautiful, deep, and real-time cosmic breathing radar. It cycles through celestial bodies in a 60° dome above you, proving that even in solitude, at least one star keeps you company.</em>
+  <strong>一款唯美、深邃且实时的宇宙呼吸雷达 macOS 屏幕保护程序与 Web 应用。通过物理轨道推算，在一个 60° 穹顶下循环为您播报正陪伴您的那颗星星。即使孤独，至少有一颗星星陪着你。</strong><br>
+  <em>A beautiful, deep, and real-time cosmic breathing radar macOS screensaver and web app. It cycles through celestial bodies in a 60° dome above you, proving that even in solitude, at least one star keeps you company.</em>
 </p>
 
 ---
 
 ## ✨ 核心亮点 / Key Features
 
-### 1. 🚀 人造卫星实时轨推算 / Real-time Satellite Propagation
+### 1. 🖥️ macOS 原生屏幕保护程序体验
+* **纯本地断网可用**：应用集成了 15 万+ 全球城市的离线地理坐标数据库 (`cities.json`)，支持在 macOS 系统设置的“屏幕保护程序选项”中直接搜索并设置您的常驻城市，**完全不依赖系统定位权限与外部网络请求**。
+* **秒级无感启动**：基于 WKWebView 注入 `WKUserScript` 技术，实现配置参数无缝穿透。屏保触发瞬间，直接越过所有的授权与介绍页面，0 延迟展现浩瀚星空。
+* **自动化打包与部署**：提供 `./deploy.sh` 一键构建脚本，自动完成前端 Vite 编译、Swift 原生编译、资源合并、签名提权与系统缓存刷新，实现极速迭代。
+
+### 2. 🚀 人造卫星与天体实时轨推算
 * **SGP4 轨道模型**：引入經典的 `satellite.js` 物理轨道库，结合 TLE 两行轨道要素，实时解算出人造卫星在您顶心坐标系（Topocentric）的高度角、方位角与斜距（Range）。
-* **动态 TLE 拉取 + 离线容灾**：启动时自动拉取前 50 颗最热门卫星与最新星链（Starlink）数据。若网络不可用，自动降级至内置经典空间站（ISS/CSS）和哈勃太空望远镜（HST）等离线轨道要素。
-* **极速飞越评级**：当近地空间站或人造卫星在您头顶 10 度天空范围内飞越时，系统将给予最高优先评级，以秒为单位滚动展示人类空间站的飞跃速度与距离！
-
-### 2. 🌌 60° 穹顶雷达与深空陪伴 / 60° Cosmic Dome & Solitude Companion
-* **60° 广袤穹顶与 8秒呼吸轮播**：我们将观测阈值设定为高度角 $\ge 60^\circ$。符合条件的行星、航天器或恒星将被收入穹顶雷达池中。每隔 8 秒，系统会以极具生命力的慢速呼吸动效，在您眼前循环更替这一刻头顶星空的守望者。
 * **八大行星与 2800 颗亮星**：集成视星等 5.5 以内的 HYG 亮星星表以及八大行星轨道计算。系统不仅能捕捉微弱的暗星，甚至可能告诉您，此时木星或火星恰好位于您的夜空最高点。
-* **诗意宇宙解说**：为不同天体定制的沉浸式双语解说词。它不再是冰冷的数据，而是通过诸如 *“此刻，一颗 517.7 光年外的位于唧筒座的恒星，正高悬于你的天顶。”* 等语句，建立起属于你与宇宙的私人浪漫。
+* **动态 TLE 拉取 + 离线容灾**：(Web模式下) 启动时自动拉取最热门卫星与最新星链数据；若网络不可用，自动降级至内置经典空间站和哈勃太空望远镜的离线轨道要素。
 
-### 3. ⚡ 定位仪式感与无缝状态切换 / Location Ceremony & Seamless Transitions
-* **“正在解析空间坐标”**：初次点击“开启连接”时，应用会提供 1.5 秒的悬念与信任反馈，增强了“与深空接轨”的仪式感。
-* **绝对静谧的后台轮播重算**：在您静静欣赏 8 秒呼吸文案的同时，后台不仅在为您高精度刷新 GPS (`maximumAge: 0`)，还在静默地以 60 秒为周期重算当前穹顶上空的候选天体，做到真正的无感切换。
-* **全局绝对定位防抖**：采用终极 `position: absolute` 防抖架构。无论中英文本如何更替，天顶恒星（Zenith Dot）都被死死锁定在像素级坐标系中，永不偏移，彻底杜绝字体基线差异造成的任何排版跳跃。
-
-### 4. ⏱️ 高精度自转时针 / Sub-second Earth Rotation Chronometer
-* **肉眼见证地球自转**：我们将 `ALTITUDE`（高度角）与 `ZENITH OFFSET`（天顶偏离角）的计算与输出精度提升至**小数点后三位 (`.toFixed(3)`)**。
-* **宇宙时空律动**：由于地球以约 $15^\circ/\text{小时}$ 的速度自转（每秒钟天空掠过约 $0.00417^\circ$），在每秒钟的更新频率下，您会直观地看到小数点后第三位数字以约 **`0.004`** 的速度进行优美、均匀的数字滚跳，带给您星空在分秒间流逝的绝佳天文质感。
+### 3. 🌌 60° 穹顶雷达与深空陪伴
+* **60° 广袤穹顶与 8秒呼吸轮播**：我们将观测阈值设定为高度角 $\ge 60^\circ$。符合条件的行星、航天器或恒星将被收入穹顶雷达池中。每隔 8 秒，系统会以极具生命力的慢速呼吸动效，在您眼前循环更替这一刻头顶星空的守望者。
+* **诗意宇宙解说**：为不同天体定制的沉浸式多语言解说词（支持中/英/日）。通过诸如 *“此刻，一颗 517.7 光年外的恒星，正高悬于你的天顶。”* 等语句，建立起属于你与宇宙的私人浪漫。
+* **高精度自转时针**：高度角与天顶偏离角的计算精度精确至小数点后三位 (`.toFixed(3)`)，肉眼可见地球自转带来的小数点匀速跳动。
 
 ---
 
 ## 📂 项目结构映射 / Project Directory Map
 
-* [`index.html`](file:///Users/sunfangyu/star-tracker/index.html) - 简约高级感的暗色系单页应用容器。
-* [`style.css`](file:///Users/sunfangyu/star-tracker/style.css) - 精美极简主义设计，包含夜空粒子与呼吸动画。
-* [`src/main.js`](file:///Users/sunfangyu/star-tracker/src/main.js) - 地理定位控制器与每秒刷新数据流核心逻辑。
-* [`src/astronomy.js`](file:///Users/sunfangyu/star-tracker/src/astronomy.js) - 融合行星（含太阳/月亮）、恒星（HYG库）与人造卫星的权重计算引擎。
-* [`src/satellite_engine.js`](file:///Users/sunfangyu/star-tracker/src/satellite_engine.js) - 基于 SGP4 模型解算顶心高度角、方位角与斜距的独立算法库。
-* [`src/copywriter.js`](file:///Users/sunfangyu/star-tracker/src/copywriter.js) - 为不同天体定制的沉浸式唯美中文文案生成器。
-* [`src/data/`](file:///Users/sunfangyu/star-tracker/src/data/) - 存放离线 TLE 保底数据、恒星目录与标准星座映射。
-* [`工作规范.md`](file:///Users/sunfangyu/star-tracker/工作规范.md) - 中英双语的版本提交与模块自动 Commit 规范。
+本仓库采用 Monorepo 范式，融合了 Web 前端与 macOS 原生插件开发环境：
+
+* **前端核心 (Web/JS)**:
+  * [`index.html`](./index.html) - 简约高级感的暗色系单页应用容器（包含 `#fallback` 与 `#broadcaster` 视图）。
+  * [`style.css`](./style.css) - 精美极简主义设计，包含夜空粒子与呼吸动画。
+  * [`src/main.js`](./src/main.js) - 控制前端生命周期、解析 macOS 注入的参数字典，并负责视图调度。
+  * [`src/astronomy.js`](./src/astronomy.js) - 融合行星、恒星（HYG库）与人造卫星的权重计算引擎。
+  * [`src/copywriter.js`](./src/copywriter.js) - 沉浸式多语言文案生成器。
+* **macOS 屏保壳层 (Swift)**:
+  * [`Sources/MyUniverseView.swift`](./Sources/MyUniverseView.swift) - 继承自 `ScreenSaverView`，内嵌 `WKWebView` 并在加载前通过 UserScript 注入本地选项参数。
+  * [`Sources/ConfigureSheetController.swift`](./Sources/ConfigureSheetController.swift) - 控制 macOS 原生的选项设置面板（Options），包含 `NSComboBox` 离线城市搜索框。
+  * [`cities.json`](./cities.json) - 由脚本提炼的全球 15万+ 城市离线数据库，用于 Options 中的本地检索。
+* **工程化**:
+  * [`deploy.sh`](./deploy.sh) - 一键自动编译、合成 Universal Binary 并在本地安装测试的 Shell 脚本。
+  * [`project.yml`](./project.yml) - XcodeGen 配置，用于定义 macOS Bundle Target。
 
 ---
 
-## 🛠️ 安装与运行 / Installation & Running
+## 🛠️ 安装与开发构建 / Installation & Development
 
-如果您需要在本地运行、测试或进行二次开发，请确保您的设备上安装了 [Node.js](https://nodejs.org/)。
-
-### 1. 安装项目依赖 / Install Dependencies
+### 1. 安装开发环境依赖
+请确保系统已安装 **Node.js** 和 **Xcode Command Line Tools** (或完整 Xcode)，以及用于生成 Xcode 工程的 `xcodegen`。
 ```bash
+# 安装前端依赖
 npm install
+
+# 如果需要手动生成 Xcode 工程结构 (调试 Swift)
+xcodegen generate
 ```
 
-### 2. 启动开发服务器 / Run Vite Development Server
+### 2. 纯前端 Web 开发调试
+如果您只想调试星空算法与 Web UI：
 ```bash
 npm run dev
 ```
-启动后，在浏览器中打开控制台输出的地址即可体验热更新开发环境（通常为 `http://localhost:60000/`）。
+启动后在浏览器中打开，Web 端将采用默认的 Geolocation 获取授权并运行（可通过 `/?mode=screensaver` 测试屏保视图）。
 
-### 3. 构建生产包 / Build for Production
+### 3. 一键编译并安装 macOS 屏幕保护程序
+本仓库提供了一体化的部署脚本，它会自动执行前端打包（Vite）、Swift 编译构建并自动将最终资源放进系统目录。
 ```bash
-npm run build
+chmod +x deploy.sh
+./deploy.sh
 ```
-打包输出的文件将存放于根目录的 `dist/` 文件夹下，您可以直接将其部署至任意静态托管平台（如 GitHub Pages, Vercel 等）。
+部署完成后：
+1. 打开 macOS 的 **系统设置 (System Settings)** -> **屏幕保护程序 (Screen Saver)**。
+2. 找到并选中 **MyUniverse**。
+3. 点击 **选项 (Options)**，在弹出的搜索框中输入您所在的城市（如 `Shanghai`, `Tokyo`）并保存。
+4. 点击预览，享受星空。
 
 ---
 
-## 🌟 工作规范规范说明 / Version Control Guidelines
-本仓库严格遵守 [工作规范.md](file:///Users/sunfangyu/star-tracker/工作规范.md) 所定义的原子化开发原则：
-> 每当完成一个具体功能模块并测试通过后，系统将自动触发 `git add` 和 `git commit`，保持每一次代码历史提交都有着原子级别的可追溯性与清晰的双语提交信息。
+## 🌟 工作规范说明 / Version Control Guidelines
+本仓库严格遵守代码工作范式，`deploy.sh` 在成功构建后会自动触发 `git commit`，保持持续迭代原子性。对于重大架构变动，需提交独立的 Commit。
