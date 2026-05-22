@@ -43,16 +43,17 @@ loadActiveSatellites();
 // 1. Runtime Mode & Settings Adapter
 // ==========================================
 const urlParams = new URLSearchParams(window.location.search);
-const isScreensaverMode = urlParams.get('mode') === 'screensaver';
+const injected = window.zenithSettings || {};
+const isScreensaverMode = injected.mode === 'screensaver' || urlParams.get('mode') === 'screensaver';
 
 const settings = {
-  lang: urlParams.get('lang') || localStorage.getItem('zenith_lang') || 'zh',
-  fontSize: urlParams.get('fontSize') || 'normal',
-  brightness: urlParams.get('brightness') || 'normal',
-  refreshRate: urlParams.get('refreshRate') || 'normal',
-  lat: urlParams.get('lat') ? parseFloat(urlParams.get('lat')) : null,
-  lon: urlParams.get('lon') ? parseFloat(urlParams.get('lon')) : null,
-  city: urlParams.get('city') || null
+  lang: injected.lang || urlParams.get('lang') || localStorage.getItem('zenith_lang') || 'zh',
+  fontSize: injected.fontSize || urlParams.get('fontSize') || 'normal',
+  brightness: injected.brightness || urlParams.get('brightness') || 'normal',
+  refreshRate: injected.refreshRate || urlParams.get('refreshRate') || 'normal',
+  lat: injected.lat ? parseFloat(injected.lat) : (urlParams.get('lat') ? parseFloat(urlParams.get('lat')) : null),
+  lon: injected.lon ? parseFloat(injected.lon) : (urlParams.get('lon') ? parseFloat(urlParams.get('lon')) : null),
+  city: injected.city || urlParams.get('city') || null
 };
 
 if (!isScreensaverMode) {

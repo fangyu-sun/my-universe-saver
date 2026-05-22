@@ -64,13 +64,29 @@ class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
         }
         
         let city = defaults?.string(forKey: "city") ?? "Saved Location"
-        
         let fontSize = (defaults?.string(forKey: "fontSize") ?? "Normal").lowercased()
         let brightness = (defaults?.string(forKey: "brightness") ?? "Normal").lowercased()
         let refreshRate = (defaults?.string(forKey: "refreshRate") ?? "Normal").lowercased()
         
         let webConfiguration = WKWebViewConfiguration()
         webConfiguration.preferences.setValue(true, forKey: "developerExtrasEnabled")
+        
+        let userContentController = WKUserContentController()
+        let scriptSource = """
+        window.zenithSettings = {
+            mode: 'screensaver',
+            lat: '\(lat)',
+            lon: '\(lon)',
+            city: '\(city)',
+            lang: '\(lang)',
+            fontSize: '\(fontSize)',
+            brightness: '\(brightness)',
+            refreshRate: '\(refreshRate)'
+        };
+        """
+        let userScript = WKUserScript(source: scriptSource, injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        userContentController.addUserScript(userScript)
+        webConfiguration.userContentController = userContentController
         
         let newWebView = WKWebView(frame: self.bounds, configuration: webConfiguration)
         newWebView.autoresizingMask = [.width, .height]
@@ -81,23 +97,9 @@ class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
         self.webView = newWebView
         
         if let htmlURL = Bundle(for: MyUniverseView.self).url(forResource: "index", withExtension: "html", subdirectory: "dist") {
-            var urlComponents = URLComponents(url: htmlURL, resolvingAgainstBaseURL: false)!
-            urlComponents.queryItems = [
-                URLQueryItem(name: "mode", value: "screensaver"),
-                URLQueryItem(name: "lat", value: lat),
-                URLQueryItem(name: "lon", value: lon),
-                URLQueryItem(name: "city", value: city),
-                URLQueryItem(name: "lang", value: lang),
-                URLQueryItem(name: "fontSize", value: fontSize),
-                URLQueryItem(name: "brightness", value: brightness),
-                URLQueryItem(name: "refreshRate", value: refreshRate)
-            ]
-            
-            if let url = urlComponents.url {
-                webView?.isHidden = false
-                errorLabel?.isHidden = true
-                webView?.loadFileURL(url, allowingReadAccessTo: htmlURL.deletingLastPathComponent())
-            }
+            webView?.isHidden = false
+            errorLabel?.isHidden = true
+            newWebView.loadFileURL(htmlURL, allowingReadAccessTo: htmlURL.deletingLastPathComponent())
         } else {
             showFallbackMessage("MISSING LOCAL RESOURCES")
         }
