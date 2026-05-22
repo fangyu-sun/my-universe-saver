@@ -12,6 +12,10 @@ else
     echo "✔️ 代码已提交。"
 fi
 
+echo "🔨 正在构建前端 Web 应用..."
+npm install
+npm run build
+
 echo "🔨 正在编译 MyUniverse.saver..."
 rm -rf MyUniverse.saver/Contents/MacOS/MyUniverse
 echo "🔨 正在为 x86_64 架构编译..."
@@ -24,6 +28,10 @@ rm MyUniverse_x86_64 MyUniverse_arm64
 
 echo "🔐 正在进行代码签名..."
 codesign --force --sign - MyUniverse.saver/Contents/MacOS/MyUniverse
+
+echo "📦 正在将本地前端构建产物打包进入 Screen Saver..."
+mkdir -p MyUniverse.saver/Contents/Resources
+cp -R dist MyUniverse.saver/Contents/Resources/
 
 # 更新外层 Bundle 的时间戳，以便 Finder 和系统设置能正确识别到修改时间
 touch MyUniverse.saver

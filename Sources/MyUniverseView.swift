@@ -78,22 +78,25 @@ class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
         self.addSubview(newWebView)
         self.webView = newWebView
         
-        var urlComponents = URLComponents(string: "https://my-star-project-ten.vercel.app/")!
-        urlComponents.queryItems = [
-            URLQueryItem(name: "mode", value: "screensaver"),
-            URLQueryItem(name: "lat", value: lat),
-            URLQueryItem(name: "lon", value: lon),
-            URLQueryItem(name: "lang", value: lang),
-            URLQueryItem(name: "fontSize", value: fontSize),
-            URLQueryItem(name: "brightness", value: brightness),
-            URLQueryItem(name: "refreshRate", value: refreshRate)
-        ]
-        
-        if let url = urlComponents.url {
-            let request = URLRequest(url: url)
-            webView?.isHidden = false
-            errorLabel?.isHidden = true
-            webView?.load(request)
+        if let htmlURL = Bundle(for: MyUniverseView.self).url(forResource: "index", withExtension: "html", subdirectory: "dist") {
+            var urlComponents = URLComponents(url: htmlURL, resolvingAgainstBaseURL: false)!
+            urlComponents.queryItems = [
+                URLQueryItem(name: "mode", value: "screensaver"),
+                URLQueryItem(name: "lat", value: lat),
+                URLQueryItem(name: "lon", value: lon),
+                URLQueryItem(name: "lang", value: lang),
+                URLQueryItem(name: "fontSize", value: fontSize),
+                URLQueryItem(name: "brightness", value: brightness),
+                URLQueryItem(name: "refreshRate", value: refreshRate)
+            ]
+            
+            if let url = urlComponents.url {
+                webView?.isHidden = false
+                errorLabel?.isHidden = true
+                webView?.loadFileURL(url, allowingReadAccessTo: htmlURL.deletingLastPathComponent())
+            }
+        } else {
+            showFallbackMessage("MISSING LOCAL RESOURCES")
         }
     }
 
