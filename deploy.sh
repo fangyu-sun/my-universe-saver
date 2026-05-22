@@ -22,6 +22,9 @@ echo "🧬 正在合成 Universal Binary..."
 lipo -create -output MyUniverse.saver/Contents/MacOS/MyUniverse MyUniverse_x86_64 MyUniverse_arm64
 rm MyUniverse_x86_64 MyUniverse_arm64
 
+echo "🔐 正在进行代码签名..."
+codesign --force --sign - MyUniverse.saver/Contents/MacOS/MyUniverse
+
 # 更新外层 Bundle 的时间戳，以便 Finder 和系统设置能正确识别到修改时间
 touch MyUniverse.saver
 
