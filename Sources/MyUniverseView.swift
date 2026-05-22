@@ -67,64 +67,8 @@ class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
         let brightness = (defaults?.string(forKey: "brightness") ?? "Normal").lowercased()
         let refreshRate = (defaults?.string(forKey: "refreshRate") ?? "Normal").lowercased()
         
-        // 核心突破：注入底层 MouseEvent 强行骗过 React 合成事件系统
-        let js = """
-        (function() {
-            // Mock Location
-            navigator.geolocation.getCurrentPosition = function(success, error) {
-                success({ coords: { latitude: \(lat), longitude: \(lon), accuracy: 10 }, timestamp: Date.now() });
-            };
-            navigator.geolocation.watchPosition = function(success, error) {
-                success({ coords: { latitude: \(lat), longitude: \(lon), accuracy: 10 }, timestamp: Date.now() });
-                return 1;
-            };
-            
-            // 真实物理点击模拟器
-            function simulateClick(element) {
-                ['mousedown', 'click', 'mouseup'].forEach(mouseEventType =>
-                    element.dispatchEvent(
-                        new MouseEvent(mouseEventType, {
-                            view: window,
-                            bubbles: true,
-                            cancelable: true,
-                            buttons: 1
-                        })
-                    )
-                );
-            }
-            
-            let clicked = false;
-            const tryStart = () => {
-                if(clicked) return;
-                
-                const intro = document.getElementById('intro');
-                if (intro && intro.classList.contains('active')) {
-                    // Click specific language based on user preference
-                    const langOpt = document.querySelector(`.lang-selector-inline .lang-inline-opt[data-lang="\(lang)"]`);
-                    if (langOpt) { simulateClick(langOpt); }
-                    
-                    // Click start button automatically
-                    const startBtn = document.getElementById('start-btn');
-                    if (startBtn) { 
-                        simulateClick(startBtn); 
-                        clicked = true;
-                        clearInterval(interval);
-                    }
-                }
-            };
-            // 高频轮询等待 DOM 与事件绑定完成
-            const interval = setInterval(tryStart, 100);
-            setTimeout(() => clearInterval(interval), 10000);
-        })();
-        """
-        
-        let userScript = WKUserScript(source: js, injectionTime: .atDocumentStart, forMainFrameOnly: true)
-        let contentController = WKUserContentController()
-        contentController.addUserScript(userScript)
-        
         let webConfiguration = WKWebViewConfiguration()
         webConfiguration.preferences.setValue(true, forKey: "developerExtrasEnabled")
-        webConfiguration.userContentController = contentController
         
         let newWebView = WKWebView(frame: self.bounds, configuration: webConfiguration)
         newWebView.autoresizingMask = [.width, .height]
