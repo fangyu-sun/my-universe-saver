@@ -43,9 +43,14 @@ rm -rf ~/Library/Screen\ Savers/MyUniverse.saver
 echo "📥 正在安装新版本到本地..."
 cp -R MyUniverse.saver ~/Library/Screen\ Savers/
 
-echo "🔄 正在重启系统设置以清除 UI 缓存..."
+echo "🔄 正在重启系统设置与清理内核缓存..."
 killall "System Settings" 2>/dev/null || true
+killall legacyScreenSaver 2>/dev/null || true
+killall ScreenSaverEngine 2>/dev/null || true
 
+# 彻底清除 WKWebView 磁盘缓存，防止它加载旧版的 index.html
+rm -rf ~/Library/Containers/com.apple.ScreenSaver.Engine.legacyScreenSaver/Data/Library/Caches/* 2>/dev/null || true
+rm -rf ~/Library/Containers/com.apple.ScreenSaver.Engine.legacyScreenSaver/Data/Library/WebKit/* 2>/dev/null || true
 echo "🚀 正在打开屏幕保护程序设置面板..."
 # 打开 macOS Sonoma 屏幕保护程序设置选项卡
 open -b com.apple.systempreferences /System/Library/PreferencePanes/DesktopScreenEffectsPref.prefPane || true
