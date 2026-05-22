@@ -70,6 +70,8 @@ class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
         
         let webConfiguration = WKWebViewConfiguration()
         webConfiguration.preferences.setValue(true, forKey: "developerExtrasEnabled")
+        webConfiguration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
+        webConfiguration.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
         // Force non-persistent data store to prevent macOS from caching old index.html
         webConfiguration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
         
