@@ -74,18 +74,23 @@ class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
         webConfiguration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
         
         let userContentController = WKUserContentController()
-        let scriptSource = """
-        window.zenithSettings = {
-            mode: 'screensaver',
-            lat: '\(lat)',
-            lon: '\(lon)',
-            city: '\(city)',
-            lang: '\(lang)',
-            fontSize: '\(fontSize)',
-            brightness: '\(brightness)',
-            refreshRate: '\(refreshRate)'
-        };
-        """
+        let settingsDict: [String: Any] = [
+            "mode": "screensaver",
+            "lat": lat,
+            "lon": lon,
+            "city": city,
+            "lang": lang,
+            "fontSize": fontSize,
+            "brightness": brightness,
+            "refreshRate": refreshRate
+        ]
+        
+        var scriptSource = "window.zenithSettings = {};"
+        if let jsonData = try? JSONSerialization.data(withJSONObject: settingsDict, options: []),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            scriptSource = "window.zenithSettings = \(jsonString);"
+        }
+        
         let userScript = WKUserScript(source: scriptSource, injectionTime: .atDocumentStart, forMainFrameOnly: true)
         userContentController.addUserScript(userScript)
         webConfiguration.userContentController = userContentController
