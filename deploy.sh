@@ -16,6 +16,9 @@ echo "🔨 正在编译 MyUniverse.saver..."
 rm -rf MyUniverse.saver/Contents/MacOS/MyUniverse
 swiftc -o MyUniverse.saver/Contents/MacOS/MyUniverse -emit-library -Xlinker -bundle Sources/MyUniverseView.swift Sources/ConfigureSheetController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
 
+# 更新外层 Bundle 的时间戳，以便 Finder 和系统设置能正确识别到修改时间
+touch MyUniverse.saver
+
 echo "🧹 正在清理旧版本的安装缓存..."
 rm -rf ~/Library/Screen\ Savers/MyUniverse.saver
 
