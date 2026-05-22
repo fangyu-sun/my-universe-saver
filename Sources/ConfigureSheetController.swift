@@ -2,10 +2,9 @@ import Cocoa
 import CoreLocation
 import ScreenSaver
 
-class ConfigureSheetController: NSObject, CLLocationManagerDelegate {
+class ConfigureSheetController: NSObject {
 
     private var window: NSPanel!
-    private var locationManager: CLLocationManager!
 
     private var latField: NSTextField!
     private var lonField: NSTextField!
@@ -119,22 +118,28 @@ class ConfigureSheetController: NSObject, CLLocationManagerDelegate {
     }
 
     @objc private func fetchLocation() {
-        locationManager = CLLocationManager()
-        locationManager.delegate = self
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.startUpdatingLocation()
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if let loc = locations.first {
-            latField.stringValue = String(format: "%.4f", loc.coordinate.latitude)
-            lonField.stringValue = String(format: "%.4f", loc.coordinate.longitude)
-            manager.stopUpdatingLocation()
+        guard let url = URL(string: "https://api.bigdatacloud.net/data/reverse-geocode-client") else { return }
+        
+        let task = URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            guard let self = self, let data = data, error == nil else {
+                print("Location fetch error: \(String(describing: error))")
+                return
+            }
+            
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let lat = json["latitude"] as? Double,
+                   let lon = json["longitude"] as? Double {
+                    DispatchQueue.main.async {
+                        self.latField.stringValue = String(format: "%.4f", lat)
+                        self.lonField.stringValue = String(format: "%.4f", lon)
+                    }
+                }
+            } catch {
+                print("JSON parse error: \(error)")
+            }
         }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("Location error: \(error)")
+        task.resume()
     }
 
     @objc private func save() {
