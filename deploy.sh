@@ -3,7 +3,7 @@ set -e
 
 echo "📦 正在自动保存代码到 Git (工作范式)..."
 # 自动添加跟踪的文件
-git add .gitignore Sources/ Info.plist project.yml deploy.sh
+git add .gitignore Sources/ Info.plist project.yml deploy.sh src/ index.html
 # 检查是否有需要提交的修改
 if git diff-index --quiet HEAD --; then
     echo "✔️ 没有需要提交的更改。"

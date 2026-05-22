@@ -37,10 +37,56 @@ async function loadActiveSatellites() {
   }
 }
 
-// Start loading immediately on page load
 loadActiveSatellites();
 
-// --------------------- i18n Localization ---------------------
+// ==========================================
+// 1. Runtime Mode & Settings Adapter
+// ==========================================
+const urlParams = new URLSearchParams(window.location.search);
+const isScreensaverMode = urlParams.get('mode') === 'screensaver';
+
+const settings = {
+  lang: urlParams.get('lang') || localStorage.getItem('zenith_lang') || 'zh',
+  fontSize: urlParams.get('fontSize') || 'normal',
+  brightness: urlParams.get('brightness') || 'normal',
+  refreshRate: urlParams.get('refreshRate') || 'normal',
+  lat: urlParams.get('lat') ? parseFloat(urlParams.get('lat')) : null,
+  lon: urlParams.get('lon') ? parseFloat(urlParams.get('lon')) : null
+};
+
+if (!isScreensaverMode) {
+  localStorage.setItem('zenith_lang', settings.lang);
+}
+let currentLang = settings.lang;
+
+// Map settings to DOM for visual adaptations if needed
+document.documentElement.setAttribute('data-font-size', settings.fontSize);
+document.documentElement.setAttribute('data-brightness', settings.brightness);
+document.documentElement.setAttribute('data-refresh-rate', settings.refreshRate);
+
+
+// ==========================================
+// 2. View Controller
+// ==========================================
+const introScreen = document.getElementById('intro');
+const loadingScreen = document.getElementById('loading');
+const broadcasterScreen = document.getElementById('broadcaster');
+const fallbackScreen = document.getElementById('fallback');
+
+function switchScreen(screenEl) {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  if (screenEl) screenEl.classList.add('active');
+}
+
+function showIntro() { switchScreen(introScreen); }
+function showBroadcaster() { switchScreen(broadcasterScreen); }
+function showFallback() { switchScreen(fallbackScreen); }
+function showLoading() { switchScreen(loadingScreen); }
+
+
+// ==========================================
+// 3. I18n & UI
+// ==========================================
 const UI_TRANSLATIONS = {
   zh: {
     introText: "此应用需要获取地理位置，<br>以计算此时此刻您上方的宇宙状态。",
@@ -86,12 +132,9 @@ const UI_TRANSLATIONS = {
   }
 };
 
-let currentLang = localStorage.getItem('zenith_lang') || 'zh';
-
 function applyLanguage() {
   const t = UI_TRANSLATIONS[currentLang];
   
-  // Set lang class on body to allow styling changes based on language
   if (currentLang === 'en') {
     document.body.classList.add('lang-en');
     document.body.classList.remove('lang-zh', 'lang-ja');
@@ -109,7 +152,6 @@ function applyLanguage() {
   if (introTextEl) introTextEl.innerHTML = t.introText;
   if (startBtnEl) startBtnEl.textContent = t.startBtn;
   
-  // Highlight active inline language selector option
   document.querySelectorAll('.lang-inline-opt').forEach(btn => {
     if (btn.getAttribute('data-lang') === currentLang) {
       btn.classList.add('active');
@@ -119,38 +161,21 @@ function applyLanguage() {
   });
 }
 
-// --------------------- DOM Elements & Routing ---------------------
-const introScreen = document.getElementById('intro');
-const loadingScreen = document.getElementById('loading');
-const broadcasterScreen = document.getElementById('broadcaster');
-
-const mainCopyEl = document.getElementById('main-copy');
-const metaInfoEl = document.getElementById('meta-info');
-const locationTimeInfoEl = document.getElementById('location-time-info');
-const startBtn = document.getElementById('start-btn');
-
-function switchScreen(screenEl) {
-  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-  screenEl.classList.add('active');
-}
-
-// Initialize language representation
 applyLanguage();
 
-// Event listeners for inline language option buttons
 document.querySelectorAll('.lang-inline-opt').forEach(btn => {
   btn.addEventListener('click', (e) => {
     const selectedLang = e.currentTarget.getAttribute('data-lang');
-    if (selectedLang === currentLang) return; // Ignore clicks on the already active language
+    if (selectedLang === currentLang) return;
     
-    // Visually toggle active class immediately on both language selectors across pages
     document.querySelectorAll('.lang-inline-opt').forEach(b => b.classList.remove('active'));
     document.querySelectorAll(`.lang-inline-opt[data-lang="${selectedLang}"]`).forEach(el => el.classList.add('active'));
     
     currentLang = selectedLang;
-    localStorage.setItem('zenith_lang', selectedLang);
+    if (!isScreensaverMode) {
+      localStorage.setItem('zenith_lang', selectedLang);
+    }
     
-    // Smooth slow breathing transition for all text elements on active screen
     const introTextEl = document.getElementById('intro-text');
     const startBtnEl = document.getElementById('start-btn');
     const mainCopyEl = document.getElementById('main-copy');
@@ -163,11 +188,9 @@ document.querySelectorAll('.lang-inline-opt').forEach(btn => {
       if (el) el.classList.add('text-breath-out');
     });
     
-    // Wait for the slow fade-out breathing curve (800ms) to complete before changing text and fading back in
     setTimeout(() => {
       applyLanguage();
       
-      // If we are on the broadcaster screen, force immediate calculation refresh & dynamic geocoding
       if (typeof window.triggerZenithUpdate === 'function') {
         window.triggerZenithUpdate();
       }
@@ -182,45 +205,23 @@ document.querySelectorAll('.lang-inline-opt').forEach(btn => {
   });
 });
 
-// --------------------- Connection Initiation ---------------------
-startBtn.addEventListener('click', () => {
-  const t = UI_TRANSLATIONS[currentLang];
-  if (!navigator.geolocation) {
-    alert(t.geoError);
-    return;
-  }
 
-  // Ceremony feedback
-  startBtn.textContent = t.geoAcquiring;
-  startBtn.style.pointerEvents = "none";
+// ==========================================
+// 4. Cosmic Engine
+// ==========================================
+const mainCopyEl = document.getElementById('main-copy');
+const metaInfoEl = document.getElementById('meta-info');
+const locationTimeInfoEl = document.getElementById('location-time-info');
 
-  setTimeout(() => {
-    startBroadcasterSession();
-  }, 1500);
+// Expose a function to inject fresh coords dynamically if needed
+window.updateCoordinatesDynamic = null;
 
-  function startBroadcasterSession() {
-    // 1. Immediately read cached or default coordinates
-    const cachedLatStr = localStorage.getItem('zenith_last_lat');
-  const cachedLonStr = localStorage.getItem('zenith_last_lon');
-  
-  let currentLat, currentLon;
-  let cityString = "";
-  let isCityDynamic = true;
-  
-  if (cachedLatStr && cachedLonStr) {
-    currentLat = parseFloat(cachedLatStr);
-    currentLon = parseFloat(cachedLonStr);
-    cityString = localStorage.getItem('zenith_last_city') || t.cachedCity;
-    isCityDynamic = !localStorage.getItem('zenith_last_city');
-  } else {
-    // Default to Beijing
-    currentLat = 39.9042;
-    currentLon = 116.4074;
-    cityString = t.fallbackCity;
-    isCityDynamic = true;
-  }
+function startBroadcasterSession(initialLat, initialLon, initialCity, isDynamicCity) {
+  let currentLat = initialLat;
+  let currentLon = initialLon;
+  let cityString = initialCity || "";
+  let isCityDynamic = isDynamicCity;
 
-  // State variables for the dome carousel
   let domeCandidates = [];
   let currentDomeIndex = 0;
 
@@ -232,7 +233,7 @@ startBtn.addEventListener('click', () => {
     let displayCity = cityString;
     if (isCityDynamic) {
       displayCity = currentLang === 'zh' ? '北京' : currentLang === 'ja' ? '北京' : 'Beijing';
-      if (cachedLatStr && cachedLonStr && !localStorage.getItem('zenith_last_city')) {
+      if (!isScreensaverMode && localStorage.getItem('zenith_last_lat') && !localStorage.getItem('zenith_last_city')) {
         displayCity = UI_TRANSLATIONS[currentLang].cachedCity;
       }
     }
@@ -285,7 +286,6 @@ startBtn.addEventListener('click', () => {
     
     const currentT = UI_TRANSLATIONS[currentLang];
     const offZenith = (90 - currentObj.altitude).toFixed(3);
-    
     const displayId = currentObj.id ? currentObj.id.toUpperCase() : 'STAR';
     
     if (currentObj.isSatellite) {
@@ -302,7 +302,6 @@ startBtn.addEventListener('click', () => {
     if (domeCandidates.length <= 1 || isTransitioning) return;
     
     isTransitioning = true;
-    
     const transitionDuration = isManual ? 600 : 2500;
     
     if (isManual) {
@@ -335,7 +334,7 @@ startBtn.addEventListener('click', () => {
 
   function startCarousel() {
     if (carouselIntervalId) clearInterval(carouselIntervalId);
-    carouselIntervalId = setInterval(carouselTick, 10000); // 10-second breathing cycle
+    carouselIntervalId = setInterval(carouselTick, 10000);
   }
 
   broadcasterScreen.addEventListener('click', (e) => {
@@ -346,20 +345,18 @@ startBtn.addEventListener('click', () => {
     }
   });
 
-  // Store globally so it can be invoked during real-time language transitions
   window.triggerZenithUpdate = () => {
     updateTime();
     renderCurrentCandidate();
   };
 
-  // Background geocode refiner that can be invoked during language transitions
   window.triggerGeocodeRefine = function() {
     if (currentLat && currentLon) {
       fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${currentLat}&longitude=${currentLon}&localityLanguage=${currentLang}`)
         .then(res => res.json())
         .then(data => {
           cityString = data.city || data.locality || data.principalSubdivision || UI_TRANSLATIONS[currentLang].cityUnknown;
-          localStorage.setItem('zenith_last_city', cityString);
+          if (!isScreensaverMode) localStorage.setItem('zenith_last_city', cityString);
           isCityDynamic = false;
           updateTime();
         })
@@ -367,57 +364,95 @@ startBtn.addEventListener('click', () => {
     }
   };
 
-  // 3. Immediately render the cached sky state and transition to broadcaster
+  // Provide a method to instantly inject fresh coordinates
+  window.updateCoordinatesDynamic = function(freshLat, freshLon) {
+    currentLat = freshLat;
+    currentLon = freshLon;
+    window.triggerGeocodeRefine();
+    fetchDomeCandidates();
+    currentDomeIndex = 0;
+    renderCurrentCandidate();
+  };
+
   fetchDomeCandidates();
   updateTime();
   renderCurrentCandidate();
-  switchScreen(broadcasterScreen);
+  showBroadcaster();
 
-  // 4. Start the clocks and carousels
   setInterval(updateTime, 1000);
   setInterval(fetchDomeCandidates, 60000);
   
-  // Offset the first tick by 2.5s so text swapping perfectly aligns with the dimmest point of the CSS animation
   setTimeout(() => {
     carouselTick();
     startCarousel();
   }, 2500);
 
-  // 5. Query for fresh real-time coordinates in the background silently
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const freshLat = position.coords.latitude;
-      const freshLon = position.coords.longitude;
-      
-      currentLat = freshLat;
-      currentLon = freshLon;
-      localStorage.setItem('zenith_last_lat', freshLat);
-      localStorage.setItem('zenith_last_lon', freshLon);
+  // Attempt reverse geocoding on boot
+  window.triggerGeocodeRefine();
+}
 
-      fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${freshLat}&longitude=${freshLon}&localityLanguage=${currentLang}`)
-        .then(res => res.json())
-        .then(data => {
-          cityString = data.city || data.locality || data.principalSubdivision || UI_TRANSLATIONS[currentLang].cityUnknown;
-          localStorage.setItem('zenith_last_city', cityString);
-          isCityDynamic = false;
-          updateTime();
-        })
-        .catch(() => {
-          cityString = `${freshLat.toFixed(2)}, ${freshLon.toFixed(2)}`;
-          isCityDynamic = false;
-          updateTime();
-        });
-      
-      // Instantly trigger an update with the fresh coordinates
-      fetchDomeCandidates();
-      currentDomeIndex = 0;
-      renderCurrentCandidate();
-    },
-    (error) => {
-      console.warn("Background geolocation refresh failed or was declined.", error);
-      // We do not show any annoying error alert since the cached/default location is already running beautifully!
-    },
-    { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 }
-  );
+
+// ==========================================
+// 5. Location Provider & Bootstrapping
+// ==========================================
+if (isScreensaverMode) {
+  // Screensaver Mode: Skip intro, skip geolocation API, use passed settings
+  if (settings.lat !== null && settings.lon !== null && !isNaN(settings.lat) && !isNaN(settings.lon)) {
+    startBroadcasterSession(settings.lat, settings.lon, `${settings.lat.toFixed(2)}, ${settings.lon.toFixed(2)}`, false);
+  } else {
+    showFallback();
   }
-});
+} else {
+  // Web Mode: Standard original workflow
+  showIntro();
+  
+  const startBtn = document.getElementById('start-btn');
+  startBtn.addEventListener('click', () => {
+    const t = UI_TRANSLATIONS[currentLang];
+    if (!navigator.geolocation) {
+      alert(t.geoError);
+      return;
+    }
+
+    startBtn.textContent = t.geoAcquiring;
+    startBtn.style.pointerEvents = "none";
+
+    // Start with cached or default immediately
+    const cachedLatStr = localStorage.getItem('zenith_last_lat');
+    const cachedLonStr = localStorage.getItem('zenith_last_lon');
+    
+    let currentLat = 39.9042;
+    let currentLon = 116.4074;
+    let cityString = t.fallbackCity;
+    let isCityDynamic = true;
+
+    if (cachedLatStr && cachedLonStr) {
+      currentLat = parseFloat(cachedLatStr);
+      currentLon = parseFloat(cachedLonStr);
+      cityString = localStorage.getItem('zenith_last_city') || t.cachedCity;
+      isCityDynamic = !localStorage.getItem('zenith_last_city');
+    }
+
+    setTimeout(() => {
+      startBroadcasterSession(currentLat, currentLon, cityString, isCityDynamic);
+      
+      // Query for fresh coordinates in the background silently
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const freshLat = position.coords.latitude;
+          const freshLon = position.coords.longitude;
+          localStorage.setItem('zenith_last_lat', freshLat);
+          localStorage.setItem('zenith_last_lon', freshLon);
+          
+          if (window.updateCoordinatesDynamic) {
+             window.updateCoordinatesDynamic(freshLat, freshLon);
+          }
+        },
+        (error) => {
+          console.warn("Background geolocation refresh failed.", error);
+        },
+        { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 }
+      );
+    }, 1500);
+  });
+}
