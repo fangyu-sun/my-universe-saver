@@ -43,17 +43,23 @@ loadActiveSatellites();
 // 1. Runtime Mode & Settings Adapter
 // ==========================================
 const urlParams = new URLSearchParams(window.location.search);
+const hashParams = new URLSearchParams(window.location.hash.substring(1));
 const injected = window.zenithSettings || {};
-const isScreensaverMode = injected.mode === 'screensaver' || urlParams.get('mode') === 'screensaver';
+
+function getParam(key) {
+  return hashParams.get(key) || injected[key] || urlParams.get(key) || null;
+}
+
+const isScreensaverMode = getParam('mode') === 'screensaver';
 
 const settings = {
-  lang: injected.lang || urlParams.get('lang') || localStorage.getItem('zenith_lang') || 'zh',
-  fontSize: injected.fontSize || urlParams.get('fontSize') || 'normal',
-  brightness: injected.brightness || urlParams.get('brightness') || 'normal',
-  refreshRate: injected.refreshRate || urlParams.get('refreshRate') || 'normal',
-  lat: injected.lat ? parseFloat(injected.lat) : (urlParams.get('lat') ? parseFloat(urlParams.get('lat')) : null),
-  lon: injected.lon ? parseFloat(injected.lon) : (urlParams.get('lon') ? parseFloat(urlParams.get('lon')) : null),
-  city: injected.city || urlParams.get('city') || null
+  lang: getParam('lang') || localStorage.getItem('zenith_lang') || 'zh',
+  fontSize: getParam('fontSize') || 'normal',
+  brightness: getParam('brightness') || 'normal',
+  refreshRate: getParam('refreshRate') || 'normal',
+  lat: getParam('lat') ? parseFloat(getParam('lat')) : null,
+  lon: getParam('lon') ? parseFloat(getParam('lon')) : null,
+  city: getParam('city') ? decodeURIComponent(getParam('city')) : null
 };
 
 if (!isScreensaverMode) {
