@@ -63,6 +63,8 @@ class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
         default: lang = "en"
         }
         
+        let city = defaults?.string(forKey: "city") ?? "Saved Location"
+        
         let fontSize = (defaults?.string(forKey: "fontSize") ?? "Normal").lowercased()
         let brightness = (defaults?.string(forKey: "brightness") ?? "Normal").lowercased()
         let refreshRate = (defaults?.string(forKey: "refreshRate") ?? "Normal").lowercased()
@@ -84,6 +86,7 @@ class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
                 URLQueryItem(name: "mode", value: "screensaver"),
                 URLQueryItem(name: "lat", value: lat),
                 URLQueryItem(name: "lon", value: lon),
+                URLQueryItem(name: "city", value: city),
                 URLQueryItem(name: "lang", value: lang),
                 URLQueryItem(name: "fontSize", value: fontSize),
                 URLQueryItem(name: "brightness", value: brightness),

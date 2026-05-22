@@ -15,6 +15,7 @@ fi
 echo "🔨 正在构建前端 Web 应用..."
 npm install
 npm run build
+cp cities.json dist/cities.json
 
 echo "🔨 正在编译 MyUniverse.saver..."
 rm -rf MyUniverse.saver/Contents/MacOS/MyUniverse

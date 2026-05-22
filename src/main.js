@@ -51,7 +51,8 @@ const settings = {
   brightness: urlParams.get('brightness') || 'normal',
   refreshRate: urlParams.get('refreshRate') || 'normal',
   lat: urlParams.get('lat') ? parseFloat(urlParams.get('lat')) : null,
-  lon: urlParams.get('lon') ? parseFloat(urlParams.get('lon')) : null
+  lon: urlParams.get('lon') ? parseFloat(urlParams.get('lon')) : null,
+  city: urlParams.get('city') || null
 };
 
 if (!isScreensaverMode) {
@@ -398,7 +399,7 @@ function startBroadcasterSession(initialLat, initialLon, initialCity, isDynamicC
 if (isScreensaverMode) {
   // Screensaver Mode: Skip intro, skip geolocation API, use passed settings
   if (settings.lat !== null && settings.lon !== null && !isNaN(settings.lat) && !isNaN(settings.lon)) {
-    startBroadcasterSession(settings.lat, settings.lon, `${settings.lat.toFixed(2)}, ${settings.lon.toFixed(2)}`, false);
+    startBroadcasterSession(settings.lat, settings.lon, settings.city || `${settings.lat.toFixed(2)}, ${settings.lon.toFixed(2)}`, false);
   } else {
     showFallback();
   }
