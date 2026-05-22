@@ -47,6 +47,6 @@ killall "System Settings" 2>/dev/null || true
 
 echo "🚀 正在打开屏幕保护程序设置面板..."
 # 打开 macOS Sonoma 屏幕保护程序设置选项卡
-open "x-apple.systempreferences:com.apple.ScreenSaver-Settings.extension"
+open -b com.apple.systempreferences /System/Library/PreferencePanes/DesktopScreenEffectsPref.prefPane || true
 
 echo "✅ 部署完成！请在系统设置中预览最新的屏幕保护程序。"
