@@ -1,8 +1,8 @@
 import ScreenSaver
 import WebKit
 
-@objc(LocationSaverView)
-class LocationSaverView: ScreenSaverView, WKNavigationDelegate {
+@objc(MyUniverseView)
+class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
     
     private var webView: WKWebView?
     private var sheetController: ConfigWindowController?
@@ -39,7 +39,7 @@ class LocationSaverView: ScreenSaverView, WKNavigationDelegate {
         self.addSubview(newWebView)
         self.webView = newWebView
         
-        if let htmlURL = Bundle(for: LocationSaverView.self).url(forResource: "index", withExtension: "html", subdirectory: "Resources") {
+        if let htmlURL = Bundle(for: MyUniverseView.self).url(forResource: "index", withExtension: "html", subdirectory: "Resources") {
             newWebView.loadFileURL(htmlURL, allowingReadAccessTo: htmlURL.deletingLastPathComponent())
         }
     }
