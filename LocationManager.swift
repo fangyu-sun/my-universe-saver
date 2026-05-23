@@ -4,7 +4,7 @@ import ScreenSaver
 class LocationManager {
     static let shared = LocationManager()
     
-    private let defaults = ScreenSaverDefaults(forModuleWithName: "com.fangyu.LocationSaver")
+    private let defaults = ScreenSaverDefaults(forModuleWithName: "com.fangyu.MyUniverse")
     
     func getCity() -> String {
         return defaults?.string(forKey: "city") ?? "Unknown City"

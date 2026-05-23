@@ -1,36 +1,36 @@
 #!/bin/bash
 set -e
 
-echo "🔨 正在编译 LocationSaver..."
-rm -rf LocationSaver.saver
+echo "🔨 正在编译 MyUniverse.saver..."
+rm -rf MyUniverse.saver
 
 # 编译 Swift 源文件为动态库
 echo "🔨 正在为 x86_64 架构编译..."
-swiftc -target x86_64-apple-macos11.0 -o LocationSaver_x86_64 -emit-library -Xlinker -bundle LocationSaverView.swift LocationManager.swift ConfigWindowController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
+swiftc -target x86_64-apple-macos11.0 -o MyUniverse_x86_64 -emit-library -Xlinker -bundle LocationSaverView.swift LocationManager.swift ConfigWindowController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
 
 echo "🔨 正在为 arm64 架构编译..."
-swiftc -target arm64-apple-macos11.0 -o LocationSaver_arm64 -emit-library -Xlinker -bundle LocationSaverView.swift LocationManager.swift ConfigWindowController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
+swiftc -target arm64-apple-macos11.0 -o MyUniverse_arm64 -emit-library -Xlinker -bundle LocationSaverView.swift LocationManager.swift ConfigWindowController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
 
 echo "🧬 正在合成 Universal Binary..."
-mkdir -p LocationSaver.saver/Contents/MacOS
-lipo -create -output LocationSaver.saver/Contents/MacOS/LocationSaver LocationSaver_x86_64 LocationSaver_arm64
-rm LocationSaver_x86_64 LocationSaver_arm64
+mkdir -p MyUniverse.saver/Contents/MacOS
+lipo -create -output MyUniverse.saver/Contents/MacOS/MyUniverse MyUniverse_x86_64 MyUniverse_arm64
+rm MyUniverse_x86_64 MyUniverse_arm64
 
 echo "📦 正在打包 Resources 和 Info.plist..."
-cp Info.plist LocationSaver.saver/Contents/
-cp -R Resources LocationSaver.saver/Contents/
+cp Info.plist MyUniverse.saver/Contents/
+cp -R Resources MyUniverse.saver/Contents/
 
 echo "🔐 正在进行代码签名..."
-codesign --force --sign - LocationSaver.saver/Contents/MacOS/LocationSaver
+codesign --force --sign - MyUniverse.saver/Contents/MacOS/MyUniverse
 
 # 更新时间戳，以便系统重新加载
-touch LocationSaver.saver
+touch MyUniverse.saver
 
 echo "🧹 正在清理旧版本的安装缓存..."
-rm -rf ~/Library/Screen\ Savers/LocationSaver.saver
+rm -rf ~/Library/Screen\ Savers/MyUniverse.saver
 
 echo "📥 正在安装新版本到本地..."
-cp -R LocationSaver.saver ~/Library/Screen\ Savers/
+cp -R MyUniverse.saver ~/Library/Screen\ Savers/
 
 echo "🔄 正在重启系统设置与清理内核缓存..."
 killall "System Settings" 2>/dev/null || true

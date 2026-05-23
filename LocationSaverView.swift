@@ -25,32 +25,11 @@ class LocationSaverView: ScreenSaverView, WKNavigationDelegate {
     override func startAnimation() {
         super.startAnimation()
         
-        let city = LocationManager.shared.getCity()
-        let lat = LocationManager.shared.getLatitude()
-        let lon = LocationManager.shared.getLongitude()
-        
         let webConfiguration = WKWebViewConfiguration()
         webConfiguration.preferences.setValue(true, forKey: "developerExtrasEnabled")
         webConfiguration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
         webConfiguration.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
         webConfiguration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
-        
-        let settingsDict: [String: Any] = [
-            "city": city,
-            "lat": lat,
-            "lon": lon
-        ]
-        
-        var scriptSource = "window.saverConfig = {};"
-        if let jsonData = try? JSONSerialization.data(withJSONObject: settingsDict, options: []),
-           let jsonString = String(data: jsonData, encoding: .utf8) {
-            scriptSource = "window.saverConfig = \(jsonString);"
-        }
-        
-        let userContentController = WKUserContentController()
-        let userScript = WKUserScript(source: scriptSource, injectionTime: .atDocumentStart, forMainFrameOnly: true)
-        userContentController.addUserScript(userScript)
-        webConfiguration.userContentController = userContentController
         
         let newWebView = WKWebView(frame: self.bounds, configuration: webConfiguration)
         newWebView.autoresizingMask = [.width, .height]
@@ -62,6 +41,25 @@ class LocationSaverView: ScreenSaverView, WKNavigationDelegate {
         
         if let htmlURL = Bundle(for: LocationSaverView.self).url(forResource: "index", withExtension: "html", subdirectory: "Resources") {
             newWebView.loadFileURL(htmlURL, allowingReadAccessTo: htmlURL.deletingLastPathComponent())
+        }
+    }
+    
+    // MARK: - WKNavigationDelegate
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        let city = LocationManager.shared.getCity()
+        let lat = LocationManager.shared.getLatitude()
+        let lon = LocationManager.shared.getLongitude()
+        
+        // Use JSONSerialization to safely escape strings for JS
+        let dict: [String: String] = ["city": city, "lat": lat, "lon": lon]
+        if let jsonData = try? JSONSerialization.data(withJSONObject: dict, options: []),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            let script = "if (window.updateLocation) { var data = \(jsonString); window.updateLocation(data.city, data.lat, data.lon); }"
+            webView.evaluateJavaScript(script) { (result, error) in
+                if let error = error {
+                    print("JS Error: \(error)")
+                }
+            }
         }
     }
     
