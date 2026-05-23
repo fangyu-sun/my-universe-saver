@@ -3,13 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Location Saver</title>
+    <title>MyUniverse</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="container">
-        <h1 id="city-display">Loading City...</h1>
-        <p id="coord-display">Waiting for coordinates...</p>
+    <div id="app">
+        <!-- 核心播报界面，零交互，默认直接显示 -->
+        <div id="broadcaster">
+            <!-- 顶部/中间位置：城市和时间 -->
+            <div id="location-time-info">-- · --:--</div>
+            
+            <!-- 中间核心点缀 -->
+            <div class="zenith-dot"></div>
+            
+            <!-- 星空漫游主文案 (预留) -->
+            <h1 id="main-copy"></h1>
+            
+            <!-- 底部：宇宙状态播报 -->
+            <div id="meta-info">WAITING FOR TELEMETRY...</div>
+        </div>
     </div>
     <script src="main.js"></script>
 </body>

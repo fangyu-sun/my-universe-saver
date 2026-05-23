@@ -5,26 +5,63 @@ body, html {
     height: 100%;
     background-color: #000;
     color: #fff;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
     overflow: hidden;
 }
 
-#container {
-    text-align: center;
+#app {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-#city-display {
-    font-size: 4rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
+#broadcaster {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+/* 顶部/中间显示的城市和时间 */
+#location-time-info {
+    font-size: 1.2rem;
     letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 20px;
+    font-weight: 300;
 }
 
-#coord-display {
-    font-size: 1.5rem;
-    color: #aaaaaa;
+/* 核心点缀 */
+.zenith-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #fff;
+    border-radius: 50%;
+    margin-bottom: 20px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+/* 主文案预留位置 */
+#main-copy {
+    font-size: 2.5rem;
+    font-weight: 300;
     letter-spacing: 1px;
+    text-align: center;
+    margin: 20px 0;
+    min-height: 4rem;
+}
+
+/* 底部状态 */
+#meta-info {
+    position: absolute;
+    bottom: 40px;
+    font-size: 0.9rem;
+    letter-spacing: 1.5px;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
 }
