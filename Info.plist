@@ -2,27 +2,23 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
-	<key>CFBundleExecutable</key>
-	<string>MyUniverse</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.fangyu.MyUniverse</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>MyUniverse</string>
-	<key>CFBundlePackageType</key>
-	<string>BNDL</string>
-	<key>CFBundleShortVersionString</key>
-	<string>1.1</string>
-	<key>CFBundleVersion</key>
-	<string>2</string>
-	<key>NSPrincipalClass</key>
-	<string>MyUniverseView</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>My Universe needs your location to display accurate cosmic data.</string>
-	<key>NSLocationUsageDescription</key>
-	<string>My Universe needs your location to display accurate cosmic data.</string>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleExecutable</key>
+    <string>LocationSaver</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.fangyu.LocationSaver</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>LocationSaver</string>
+    <key>CFBundlePackageType</key>
+    <string>BNDL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>NSPrincipalClass</key>
+    <string>LocationSaverView</string>
 </dict>
 </plist>
