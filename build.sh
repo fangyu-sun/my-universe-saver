@@ -13,9 +13,6 @@ echo "📦 正在打包 Resources 和 Info.plist..."
 cp Info.plist MyUniverse.saver/Contents/
 cp -R Resources MyUniverse.saver/Contents/
 
-echo "🔐 正在进行代码签名..."
-codesign --force --sign - MyUniverse.saver/Contents/MacOS/MyUniverse
-
 # 更新时间戳，以便系统重新加载
 touch MyUniverse.saver
 
