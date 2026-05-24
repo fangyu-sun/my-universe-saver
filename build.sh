@@ -5,13 +5,23 @@ echo "🔨 正在编译 MyUniverse.saver..."
 rm -rf MyUniverse.saver
 
 # 编译 Swift 源文件为动态库
-echo "🔨 正在为 Native 架构编译..."
+echo "🔨 正在为 x86_64 架构编译..."
+swiftc -target x86_64-apple-macos11.0 -o MyUniverse_x86_64 -emit-library -Xlinker -bundle LocationSaverView.swift LocationManager.swift ConfigWindowController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
+
+echo "🔨 正在为 arm64 架构编译..."
+swiftc -target arm64-apple-macos11.0 -o MyUniverse_arm64 -emit-library -Xlinker -bundle LocationSaverView.swift LocationManager.swift ConfigWindowController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
+
+echo "🧬 正在合成 Universal Binary..."
 mkdir -p MyUniverse.saver/Contents/MacOS
-swiftc -o MyUniverse.saver/Contents/MacOS/MyUniverse -emit-library -Xlinker -bundle MyUniverseView.swift LocationManager.swift ConfigWindowController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
+lipo -create -output MyUniverse.saver/Contents/MacOS/MyUniverse MyUniverse_x86_64 MyUniverse_arm64
+rm MyUniverse_x86_64 MyUniverse_arm64
 
 echo "📦 正在打包 Resources 和 Info.plist..."
 cp Info.plist MyUniverse.saver/Contents/
 cp -R Resources MyUniverse.saver/Contents/
+
+echo "🔐 正在进行代码签名..."
+codesign --force --sign - MyUniverse.saver/Contents/MacOS/MyUniverse
 
 # 更新时间戳，以便系统重新加载
 touch MyUniverse.saver
