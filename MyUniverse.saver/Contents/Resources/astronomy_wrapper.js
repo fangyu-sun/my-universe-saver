@@ -23,8 +23,16 @@ window.initAstronomyData = async function() {
     }
 }
 
-// 核心过滤推演算法
-window.getZenithCandidates = function(lat, lon, date) {
+const planets = [
+    { id: 'Sun', name: '太阳', nameEn: 'Sun', nameJa: '太陽', isPlanet: true },
+    { id: 'Moon', name: '月亮', nameEn: 'Moon', nameJa: '月', isPlanet: true },
+    { id: 'Jupiter', name: '木星', nameEn: 'Jupiter', nameJa: '木星', isPlanet: true },
+    { id: 'Venus', name: '金星', nameEn: 'Venus', nameJa: '金星', isPlanet: true },
+    { id: 'Mars', name: '火星', nameEn: 'Mars', nameJa: '火星', isPlanet: true },
+    { id: 'Saturn', name: '土星', nameEn: 'Saturn', nameJa: '土星', isPlanet: true }
+];
+
+window.getZenithCandidates = function(lat, lon, date, activeSatellites) {
     if (!dataLoaded || typeof Astronomy === 'undefined' || typeof satellite === 'undefined') {
         return [];
     }
@@ -37,22 +45,57 @@ window.getZenithCandidates = function(lat, lon, date) {
     
     let candidates = [];
 
-    // --- 1. 恒星处理 (预过滤 + 精确计算) ---
-    const processStar = (obj) => {
-        // 预过滤：如果赤纬（Dec）与当地纬度差距超过 30 度，其最高高度角都不可能达到 60 度
-        if (Math.abs(observerLat - obj.dec) > 30.0) {
-            return;
+    // Evaluate Planets
+    for (const p of planets) {
+        try {
+            const body = Astronomy.Body[p.id];
+            const eq = Astronomy.Equator(body, time, observer, true, true);
+            const hor = Astronomy.Horizon(time, observer, eq.ra, eq.dec, 'normal');
+
+            if (hor.altitude >= 60) {
+                const distKm = eq.vec.Length() * 1.495978707e8; // AU to km (using vec length as distance approx)
+                let distStr = "";
+                if (distKm > 1e8) {
+                    distStr = (distKm / 1e8).toFixed(1) + " 亿公里";
+                } else if (distKm > 1e4) {
+                    distStr = (distKm / 1e4).toFixed(1) + " 万公里";
+                } else {
+                    distStr = distKm.toFixed(0) + " 公里";
+                }
+
+                candidates.push({
+                    type: 'planet',
+                    id: p.id,
+                    name: p.nameEn,
+                    nameZhHans: p.name,
+                    nameZhHant: p.name,
+                    nameJa: p.nameJa,
+                    constellation: 'Solar System',
+                    constellationZhHans: '太阳系',
+                    constellationZhHant: '太陽系',
+                    constellationJa: '太陽系',
+                    altitude: hor.altitude.toFixed(1),
+                    azimuth: hor.azimuth.toFixed(1),
+                    distLy: 0,
+                    distanceStr: distStr,
+                    isPlanet: true
+                });
+            }
+        } catch (e) {
+            console.error(`Error calculating planet ${p.id}:`, e);
         }
+    }
+
+    // Evaluate Stars
+    const processStar = (obj, isFamous) => {
+        // 预过滤：如果赤纬（Dec）与当地纬度差距超过 30 度，其最高高度角都不可能达到 60 度
+        if (Math.abs(observerLat - obj.dec) > 30.0) return;
 
         try {
             const hor = Astronomy.Horizon(time, observer, obj.ra, obj.dec, "normal");
             if (hor.altitude >= 60.0) {
-                // 星座翻译转换
                 let conKey = obj.con || obj.constellation; 
-                let dict = null;
-                if (conKey && window.constellations[conKey]) {
-                    dict = window.constellations[conKey];
-                }
+                let dict = window.constellations && window.constellations[conKey] ? window.constellations[conKey] : null;
 
                 candidates.push({
                     type: 'star',
@@ -67,7 +110,8 @@ window.getZenithCandidates = function(lat, lon, date) {
                     altitude: hor.altitude.toFixed(1),
                     azimuth: hor.azimuth.toFixed(1),
                     distLy: obj.distance || obj.distanceLy || 0,
-                    mag: obj.mag
+                    isFamous: isFamous,
+                    isSatellite: false
                 });
             }
         } catch (e) {
@@ -75,30 +119,26 @@ window.getZenithCandidates = function(lat, lon, date) {
         }
     };
 
-    // 遍历少量著名亮星
-    starData.forEach(processStar);
-    
-    // 如果亮星太少，继续遍历 HYG 暗星星表
-    // 为避免一帧计算量过大，其实已经通过 Dec 预过滤削减了 2/3 数据
-    hygData.forEach(processStar);
+    starData.forEach(s => processStar(s, true));
+    hygData.forEach(s => processStar(s, false));
 
-    // --- 2. 航天器处理 (SGP4 TLE 推演) ---
+    // Evaluate Satellites
+    const satsToEvaluate = (activeSatellites && activeSatellites.length > 0) ? activeSatellites : satelliteData;
     const gmst = satellite.gstime(date);
     const observerGd = {
         longitude: satellite.degreesToRadians(observerLon),
         latitude: satellite.degreesToRadians(observerLat),
-        height: 0.0 // 海拔，这里假设为0
+        height: 0.0
     };
 
-    for (let satObj of satelliteData) {
+    for (const satObj of satsToEvaluate) {
         try {
             const satrec = satellite.twoline2satrec(satObj.line1, satObj.line2);
             const positionAndVelocity = satellite.propagate(satrec, date);
             const positionEci = positionAndVelocity.position;
             
-            if (!positionEci) continue; // TLE 无法计算此时刻
+            if (!positionEci) continue;
 
-            // ECI to ECF, then Look Angles
             const positionEcf = satellite.eciToEcf(positionEci, gmst);
             const lookAngles = satellite.ecfToLookAngles(observerGd, positionEcf);
             
@@ -106,27 +146,35 @@ window.getZenithCandidates = function(lat, lon, date) {
             const az = satellite.radiansToDegrees(lookAngles.azimuth);
 
             if (alt >= 60.0) {
-                // 计算距离 (km)
-                const rangeKm = lookAngles.range;
                 candidates.push({
                     type: 'satellite',
+                    id: satObj.satelliteId ? `sat_${satObj.satelliteId}` : satObj.name,
                     name: satObj.name,
-                    nameZhHans: satObj.name,
-                    nameZhHant: satObj.name,
-                    nameJa: satObj.name,
                     altitude: alt.toFixed(1),
                     azimuth: az.toFixed(1),
-                    rangeKm: rangeKm.toFixed(0)
+                    rangeKm: lookAngles.range.toFixed(0),
+                    isSatellite: true,
+                    isFamous: false,
+                    isPlanet: false
                 });
             }
         } catch (e) {
-            console.error(`Error calculating satellite ${satObj.satelliteId}:`, e);
+            console.error(`Error calculating satellite ${satObj.name}:`, e);
         }
     }
 
-    // 按高度角从高到低排序 (最靠近天顶的排前面)
-    candidates.sort((a, b) => parseFloat(b.altitude) - parseFloat(a.altitude));
-    
-    // 我们可能获取到了很多 HYG 暗星，只保留最亮或最高的前 20 颗，防止内存堆积
+    // Scoring system
+    candidates.forEach(c => {
+        let weight = 1.0;
+        if (c.isSatellite) weight = 2.0;
+        else if (c.id === 'Moon' || c.id === 'Sun') weight = 1.5;
+        else if (c.isPlanet) weight = 1.3;
+        else if (c.isFamous) weight = 1.2;
+        else weight = 1.0;
+
+        c.score = (parseFloat(c.altitude) / 90) * weight;
+    });
+
+    candidates.sort((a, b) => b.score - a.score);
     return candidates.slice(0, 20);
-}
+};
