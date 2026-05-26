@@ -2,7 +2,7 @@ import ScreenSaver
 import WebKit
 
 @objc(MyUniverseView)
-class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
+class MyUniverseView: ScreenSaverView {
     
     private var webView: WKWebView?
     private var sheetController: ConfigWindowController?
@@ -31,10 +31,18 @@ class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
         webConfiguration.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
         webConfiguration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
         
+        // Inject JS config at document start
+        let configDict = LocationManager.shared.getJSConfig()
+        if let jsonData = try? JSONSerialization.data(withJSONObject: configDict, options: []),
+           let jsonString = String(data: jsonData, encoding: .utf8) {
+            let scriptSource = "window.initialConfig = \(jsonString);"
+            let userScript = WKUserScript(source: scriptSource, injectionTime: .atDocumentStart, forMainFrameOnly: true)
+            webConfiguration.userContentController.addUserScript(userScript)
+        }
+        
         let newWebView = WKWebView(frame: self.bounds, configuration: webConfiguration)
         newWebView.autoresizingMask = [.width, .height]
         newWebView.setValue(false, forKey: "drawsBackground")
-        newWebView.navigationDelegate = self
         
         self.addSubview(newWebView)
         self.webView = newWebView
@@ -45,21 +53,6 @@ class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
             newWebView.loadFileURL(htmlURL, allowingReadAccessTo: htmlURL.deletingLastPathComponent())
         } else {
             NSLog("MyUniverse ERROR: Cannot find index.html in bundle!")
-        }
-    }
-    
-    // MARK: - WKNavigationDelegate
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        let configDict = LocationManager.shared.getJSConfig()
-        
-        if let jsonData = try? JSONSerialization.data(withJSONObject: configDict, options: []),
-           let jsonString = String(data: jsonData, encoding: .utf8) {
-            let script = "if (window.updateConfig) { window.updateConfig(\(jsonString)); }"
-            webView.evaluateJavaScript(script) { (result, error) in
-                if let error = error {
-                    print("JS Error: \(error)")
-                }
-            }
         }
     }
     

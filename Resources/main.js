@@ -9,24 +9,13 @@ let currentConfig = {
     displayFrequency: "normal",
     showCoordinates: true,
     showCity: true,
-    showTime: true
+    showTime: true,
+    breathingCycle: 10.0
 };
 
 let displayInterval = null;
 let currentCandidates = [];
 let candidateIndex = 0;
-
-let isDataReady = false;
-
-// Expose updateConfig to global window object since we are in an ES module now
-window.updateConfig = function(config) {
-    currentConfig = Object.assign(currentConfig, config);
-    if (isDataReady) {
-        applyConfig();
-    } else {
-        window.pendingConfig = currentConfig;
-    }
-};
 
 function applyConfig() {
     // 1. 设置亮度
@@ -71,6 +60,64 @@ function updateClock() {
     coordDisplay.textContent = `${currentConfig.lat}, ${currentConfig.lon}`;
 }
 
+window.generateCopy = function(obj, langCode) {
+    let name = obj.name;
+    let constellation = obj.constellation;
+    let distStr = "";
+    
+    if (obj.type === 'satellite') {
+        if (langCode === "zh-Hans" || langCode === "zh-Hant") {
+            return {
+                nav: `你的上空，一架名为 ${name} 的航天器正在静默掠过，距离 ${obj.rangeKm} km。`,
+                meta: `${name.toUpperCase()} · 高度角 ${obj.altitude}° · 方位角 ${obj.azimuth}°`
+            };
+        } else if (langCode === "ja") {
+            return {
+                nav: `あなたの上空で、${name} と呼ばれる宇宙船が静かに通過しています。距離 ${obj.rangeKm} km。`,
+                meta: `${name.toUpperCase()} · 高度 ${obj.altitude}° · 方位角 ${obj.azimuth}°`
+            };
+        } else {
+            return {
+                nav: `Above you, a spacecraft named ${name} is silently passing by, ${obj.rangeKm} km away.`,
+                meta: `${name.toUpperCase()} · ALTITUDE ${obj.altitude}° · AZIMUTH ${obj.azimuth}°`
+            };
+        }
+    } else {
+        if (langCode === "zh-Hans") {
+            name = obj.nameZhHans || obj.name;
+            constellation = obj.constellationZhHans || obj.constellation;
+            distStr = obj.distLy ? `距离 ${obj.distLy} 光年。` : "在我们的太阳系中。";
+            return {
+                nav: `你的上空，一颗属于${constellation}的恒星正在发光，${distStr}`,
+                meta: `${name.toUpperCase()} · 高度角 ${obj.altitude}° · 方位角 ${obj.azimuth}°`
+            };
+        } else if (langCode === "zh-Hant") {
+            name = obj.nameZhHant || obj.name;
+            constellation = obj.constellationZhHant || obj.constellation;
+            distStr = obj.distLy ? `距離 ${obj.distLy} 光年。` : "在我們的太陽系中。";
+            return {
+                nav: `你的上空，一顆屬於${constellation}的恆星正在發光，${distStr}`,
+                meta: `${name.toUpperCase()} · 高度角 ${obj.altitude}° · 方位角 ${obj.azimuth}°`
+            };
+        } else if (langCode === "ja") {
+            name = obj.nameJa || obj.name;
+            constellation = obj.constellationJa || obj.constellation;
+            distStr = obj.distLy ? `距離は${obj.distLy}光年です。` : "私たちの太陽系にあります。";
+            return {
+                nav: `あなたの上空で、${constellation}に属する恒星が光っています。${distStr}`,
+                meta: `${name.toUpperCase()} · 高度 ${obj.altitude}° · 方位角 ${obj.azimuth}°`
+            };
+        } else {
+            // English Default
+            distStr = obj.distLy ? `${obj.distLy} light-years away.` : "in our solar system.";
+            return {
+                nav: `Above you, a star in ${constellation} is shining, ${distStr}`,
+                meta: `${name.toUpperCase()} · ALTITUDE ${obj.altitude}° · AZIMUTH ${obj.azimuth}°`
+            };
+        }
+    }
+};
+
 function updateMockSpaceData() {
     const mainNarrative = document.getElementById("main-narrative");
     const metaInfo = document.getElementById("meta-info");
@@ -100,72 +147,28 @@ function updateMockSpaceData() {
     }
     
     const obj = currentCandidates[candidateIndex];
+    const copy = window.generateCopy(obj, currentConfig.language);
     
-    // 组装语言文案
-    let name = obj.name;
-    let constellation = obj.constellation;
-    let distStr = "";
-    
-    if (obj.type === 'satellite') {
-        // 航天器播报
-        if (currentConfig.language === "zh-Hans" || currentConfig.language === "zh-Hant") {
-            mainNarrative.textContent = `你的上空，一架名为 ${name} 的航天器正在静默掠过，距离 ${obj.rangeKm} km。`;
-            metaInfo.textContent = `${name.toUpperCase()} · 高度角 ${obj.altitude}° · 方位角 ${obj.azimuth}°`;
-        } else if (currentConfig.language === "ja") {
-            mainNarrative.textContent = `あなたの上空で、${name} と呼ばれる宇宙船が静かに通過しています。距離 ${obj.rangeKm} km。`;
-            metaInfo.textContent = `${name.toUpperCase()} · 高度 ${obj.altitude}° · 方位角 ${obj.azimuth}°`;
-        } else {
-            mainNarrative.textContent = `Above you, a spacecraft named ${name} is silently passing by, ${obj.rangeKm} km away.`;
-            metaInfo.textContent = `${name.toUpperCase()} · ALTITUDE ${obj.altitude}° · AZIMUTH ${obj.azimuth}°`;
-        }
-    } else {
-        // 恒星/自然天体播报
-        if (currentConfig.language === "zh-Hans") {
-            name = obj.nameZhHans || obj.name;
-            constellation = obj.constellationZhHans || obj.constellation;
-            distStr = obj.distLy ? `距离 ${obj.distLy} 光年。` : "在我们的太阳系中。";
-            mainNarrative.textContent = `你的上空，一颗属于${constellation}的恒星正在发光，${distStr}`;
-            metaInfo.textContent = `${name.toUpperCase()} · 高度角 ${obj.altitude}° · 方位角 ${obj.azimuth}°`;
-        } else if (currentConfig.language === "zh-Hant") {
-            name = obj.nameZhHant || obj.name;
-            constellation = obj.constellationZhHant || obj.constellation;
-            distStr = obj.distLy ? `距離 ${obj.distLy} 光年。` : "在我們的太陽系中。";
-            mainNarrative.textContent = `你的上空，一顆屬於${constellation}的恆星正在發光，${distStr}`;
-            metaInfo.textContent = `${name.toUpperCase()} · 高度角 ${obj.altitude}° · 方位角 ${obj.azimuth}°`;
-        } else if (currentConfig.language === "ja") {
-            name = obj.nameJa || obj.name;
-            constellation = obj.constellationJa || obj.constellation;
-            distStr = obj.distLy ? `距離は${obj.distLy}光年です。` : "私たちの太陽系にあります。";
-            mainNarrative.textContent = `あなたの上空で、${constellation}に属する恒星が光っています。${distStr}`;
-            metaInfo.textContent = `${name.toUpperCase()} · 高度 ${obj.altitude}° · 方位角 ${obj.azimuth}°`;
-        } else {
-            // English Default
-            distStr = obj.distLy ? `${obj.distLy} light-years away.` : "in our solar system.";
-            mainNarrative.textContent = `Above you, a star in ${constellation} is shining, ${distStr}`;
-            metaInfo.textContent = `${name.toUpperCase()} · ALTITUDE ${obj.altitude}° · AZIMUTH ${obj.azimuth}°`;
-        }
-    }
+    mainNarrative.textContent = copy.nav;
+    metaInfo.textContent = copy.meta;
     
     candidateIndex++;
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    // 设置默认等待文案
     document.getElementById("meta-info").textContent = "LOADING DEEP SPACE CATALOGS...";
+    
+    // 读取 WKUserScript 预先注入的配置
+    if (window.initialConfig) {
+        currentConfig = Object.assign(currentConfig, window.initialConfig);
+    }
     
     // 初始化并加载海量星表数据与卫星数据
     await window.initAstronomyData();
     
-    isDataReady = true;
-    
-    if (window.pendingConfig) {
-        currentConfig = Object.assign(currentConfig, window.pendingConfig);
-        window.pendingConfig = null;
-    }
-    
-    if (currentConfig.city !== "UNKNOWN") {
+    if (currentConfig.city !== "UNKNOWN" && currentConfig.city !== "Unknown City") {
         applyConfig();
     } else {
-        document.getElementById("meta-info").textContent = "WAITING FOR TELEMETRY...";
+        document.getElementById("meta-info").textContent = "NO LOCATION SET. PLEASE CONFIGURE OPTIONS.";
     }
 });

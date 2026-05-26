@@ -47,4 +47,4 @@ rm -rf ~/Library/Containers/com.apple.ScreenSaver.Engine.legacyScreenSaver/Data/
 echo "🚀 正在打开屏幕保护程序设置面板..."
 open -b com.apple.systempreferences /System/Library/PreferencePanes/DesktopScreenEffectsPref.prefPane || true
 
-echo "✅ 部署完成！请在系统设置中找到并预览 LocationSaver。"
+echo "✅ 部署完成！请在系统设置中找到并预览 MyUniverse。"
