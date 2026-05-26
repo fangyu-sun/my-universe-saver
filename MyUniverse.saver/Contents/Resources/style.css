@@ -82,7 +82,7 @@ body, html {
     line-height: 1.5;
     letter-spacing: 2px;
     color: rgba(255, 255, 255, 0.9);
-    animation: breathe 10s infinite ease-in-out;
+    animation: breathe var(--breathe-duration, 10s) infinite ease-in-out;
 }
 
 /* 底部：技术状态行 */

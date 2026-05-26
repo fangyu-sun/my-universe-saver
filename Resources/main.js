@@ -85,15 +85,22 @@ function applyConfig() {
     if (displayInterval) clearInterval(displayInterval);
     displayInterval = setInterval(updateClock, 1000);
     
-    // 4. 重建宇宙播报循环
-    let freqMs = 10000; // normal
-    if (currentConfig.displayFrequency === "fast") freqMs = 3000;
-    if (currentConfig.displayFrequency === "slow") freqMs = 30000;
+    // 4. 重建宇宙播报循环 (与动画至暗时刻咬合)
+    let durationStr = "10s"; // normal
+    if (currentConfig.displayFrequency === "fast") durationStr = "3s";
+    if (currentConfig.displayFrequency === "slow") durationStr = "30s";
     
+    // 设置 CSS 呼吸周期
+    document.documentElement.style.setProperty('--breathe-duration', durationStr);
+    
+    // 首次立即更新
     updateMockSpaceData();
-    if (broadcastInterval) clearInterval(broadcastInterval);
-    broadcastInterval = setInterval(updateMockSpaceData, freqMs);
 }
+
+// 监听动画迭代事件：当动画回到 100%（至暗时刻）时切换文本
+document.getElementById("main-narrative").addEventListener("animationiteration", () => {
+    updateMockSpaceData();
+});
 
 function updateClock() {
     const locationTimeInfo = document.getElementById("location-time-info");
