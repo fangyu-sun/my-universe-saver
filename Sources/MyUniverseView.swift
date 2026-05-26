@@ -50,15 +50,11 @@ class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
     
     // MARK: - WKNavigationDelegate
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        let city = LocationManager.shared.getCity()
-        let lat = LocationManager.shared.getLatitude()
-        let lon = LocationManager.shared.getLongitude()
+        let configDict = LocationManager.shared.getJSConfig()
         
-        // Use JSONSerialization to safely escape strings for JS
-        let dict: [String: String] = ["city": city, "lat": lat, "lon": lon]
-        if let jsonData = try? JSONSerialization.data(withJSONObject: dict, options: []),
+        if let jsonData = try? JSONSerialization.data(withJSONObject: configDict, options: []),
            let jsonString = String(data: jsonData, encoding: .utf8) {
-            let script = "if (window.updateLocation) { var data = \(jsonString); window.updateLocation(data.city, data.lat, data.lon); }"
+            let script = "if (window.updateConfig) { window.updateConfig(\(jsonString)); }"
             webView.evaluateJavaScript(script) { (result, error) in
                 if let error = error {
                     print("JS Error: \(error)")

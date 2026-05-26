@@ -4,40 +4,51 @@
 <dict>
 	<key>files</key>
 	<dict>
+		<key>Resources/cities.json</key>
+		<data>
+		jSlii/pAfS8K6zkzufklq31h2AQ=
+		</data>
 		<key>Resources/index.html</key>
 		<data>
-		ysUlbNNOfCSA18EvliYxX6ou7CI=
+		3TsgPNvi+C4g9SksyIxylnt88jk=
 		</data>
 		<key>Resources/main.js</key>
 		<data>
-		+9PC5k8db3qO+U6wK8B9qxfF53U=
+		kl8OqoueA8W8TeOWbxI8VZmrypw=
 		</data>
 		<key>Resources/style.css</key>
 		<data>
-		CBOwmlw3gGCZ76tYLAbezDdoj+E=
+		trmYBqmocZ13UWdRw2YSM9PFe3M=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
+		<key>Resources/cities.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			5JOhyIqnRU3hgtRq2zPleVd0iicAMRuOs/8C2q+wOgg=
+			</data>
+		</dict>
 		<key>Resources/index.html</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			7lTtzgILDvCwX7WL4xFob5p9Ar8jYO3vRM70U4hojQs=
+			uAC3OOHrV+1SNIy/eTaaw8Tno37i78+rym8S24GPcK0=
 			</data>
 		</dict>
 		<key>Resources/main.js</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			SldUG76X0t/wemQzzQ01mhn57VPFP3d0vDSBvFLG07U=
+			raGjfKsTtRFFQwqWqHvXAiJ+OY4nSQU3mcaVuUeDYPU=
 			</data>
 		</dict>
 		<key>Resources/style.css</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			38mfKWMkOiP96rloBVAH+Cy7MGj60K1eEl8rNXgcExU=
+			7SWehZFleOCGZx9GsE6lLwRpZb/XOjTSSzeT5iBenbg=
 			</data>
 		</dict>
 	</dict>

@@ -1,3 +1,7 @@
+:root {
+    --font-brightness: 0.8;
+}
+
 body, html {
     margin: 0;
     padding: 0;
@@ -7,6 +11,7 @@ body, html {
     color: #fff;
     font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
     overflow: hidden;
+    opacity: var(--font-brightness);
 }
 
 #app {
