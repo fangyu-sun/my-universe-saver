@@ -6,10 +6,10 @@ rm -rf MyUniverse.saver
 
 # 编译 Swift 源文件为动态库
 echo "🔨 正在为 x86_64 架构编译..."
-swiftc -target x86_64-apple-macos11.0 -o MyUniverse_x86_64 -emit-library -Xlinker -bundle LocationSaverView.swift LocationManager.swift ConfigWindowController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
+swiftc -target x86_64-apple-macos11.0 -o MyUniverse_x86_64 -emit-library -Xlinker -bundle Sources/MyUniverseView.swift Sources/LocationManager.swift Sources/ConfigWindowController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
 
 echo "🔨 正在为 arm64 架构编译..."
-swiftc -target arm64-apple-macos11.0 -o MyUniverse_arm64 -emit-library -Xlinker -bundle LocationSaverView.swift LocationManager.swift ConfigWindowController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
+swiftc -target arm64-apple-macos11.0 -o MyUniverse_arm64 -emit-library -Xlinker -bundle Sources/MyUniverseView.swift Sources/LocationManager.swift Sources/ConfigWindowController.swift -framework ScreenSaver -framework WebKit -framework CoreLocation -framework Cocoa
 
 echo "🧬 正在合成 Universal Binary..."
 mkdir -p MyUniverse.saver/Contents/MacOS
@@ -36,10 +36,13 @@ echo "🔄 正在重启系统设置与清理内核缓存..."
 killall "System Settings" 2>/dev/null || true
 killall legacyScreenSaver 2>/dev/null || true
 killall ScreenSaverEngine 2>/dev/null || true
+killall WallpaperAgent 2>/dev/null || true
+killall cfprefsd 2>/dev/null || true
 
 # 清除 WebKit 缓存
 rm -rf ~/Library/Containers/com.apple.ScreenSaver.Engine.legacyScreenSaver/Data/Library/Caches/* 2>/dev/null || true
 rm -rf ~/Library/Containers/com.apple.ScreenSaver.Engine.legacyScreenSaver/Data/Library/WebKit/* 2>/dev/null || true
+rm -rf ~/Library/Containers/com.apple.ScreenSaver.Engine.legacyScreenSaver/Data/Library/Saved\ Application\ State/* 2>/dev/null || true
 
 echo "🚀 正在打开屏幕保护程序设置面板..."
 open -b com.apple.systempreferences /System/Library/PreferencePanes/DesktopScreenEffectsPref.prefPane || true
