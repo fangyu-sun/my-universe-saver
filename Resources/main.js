@@ -140,9 +140,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 初始化并加载海量星表数据与卫星数据
     await window.initAstronomyData();
     
-    if (currentConfig.city !== "UNKNOWN" && currentConfig.city !== "Unknown City") {
-        applyConfig();
-    } else {
-        document.getElementById("meta-info").textContent = "NO LOCATION SET. PLEASE CONFIGURE OPTIONS.";
-    }
+    // 无论是否配置了位置，都进入播报（默认经纬度为 0,0）
+    applyConfig();
 });

@@ -45,7 +45,7 @@ class ConfigWindowController: NSObject, NSComboBoxDelegate, NSComboBoxDataSource
     
     private func loadCities() {
         let bundle = Bundle(for: type(of: self))
-        if let url = bundle.url(forResource: "cities", withExtension: "json", subdirectory: "Resources"),
+        if let url = bundle.url(forResource: "cities", withExtension: "json"),
            let data = try? Data(contentsOf: url),
            let cities = try? JSONDecoder().decode([CityData].self, from: data) {
             self.allCities = cities
