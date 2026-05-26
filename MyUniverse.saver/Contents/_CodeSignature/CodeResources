@@ -4,29 +4,49 @@
 <dict>
 	<key>files</key>
 	<dict>
+		<key>Resources/.DS_Store</key>
+		<data>
+		IifDnsX92YNrTkU9Ts8ubKXIRvk=
+		</data>
 		<key>Resources/astronomy.browser.min.js</key>
 		<data>
 		xeTl1cE6WqAZuAF1wC1mb/HQCGQ=
 		</data>
 		<key>Resources/astronomy_wrapper.js</key>
 		<data>
-		HtvvXZ5InIQfhM29Y4d46zAOm7o=
+		jmIUGnAJaICTMWZrdIJJ7uSv82E=
 		</data>
 		<key>Resources/cities.json</key>
 		<data>
 		jSlii/pAfS8K6zkzufklq31h2AQ=
 		</data>
+		<key>Resources/data/constellations.js</key>
+		<data>
+		5ZcQ3c4Ma1COxF+kuAmrZGi52BU=
+		</data>
+		<key>Resources/data/hyg_stars.json</key>
+		<data>
+		Eb9Mmai/E32s7xWImXi3cqDDE+0=
+		</data>
+		<key>Resources/data/satellites_fallback.json</key>
+		<data>
+		I9n1++eCEW3lJ0Xbbs5Tvh2y4Rw=
+		</data>
+		<key>Resources/data/stars.json</key>
+		<data>
+		SCmTvb77j8aW0cMmnBQIow/5BCE=
+		</data>
 		<key>Resources/index.html</key>
 		<data>
-		GkbgGLX45D00fGG54avqNxGzTms=
+		511d/3E2zLdXMc8Uyc8gtAohQ2Y=
 		</data>
 		<key>Resources/main.js</key>
 		<data>
-		GhEy3kybLlNr90w2H9Ne/fdghiQ=
+		fXUZov9+3SK1krnvScEg2yg/DkY=
 		</data>
-		<key>Resources/star_catalog.js</key>
+		<key>Resources/satellite.min.js</key>
 		<data>
-		5vwZbW5Vx+L+cSiDA/LD3E6htoU=
+		Dqe0XvbuBl66asQH2mf6m2vGx08=
 		</data>
 		<key>Resources/style.css</key>
 		<data>
@@ -46,7 +66,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			pcAt0jgCyKhVtf3QY7vTMcV/FzXUWDJLf48akXVtykU=
+			/EEcoBGU2fFLa0Npd7p4A0qHCK4/7cuPBod0Ap2sudQ=
 			</data>
 		</dict>
 		<key>Resources/cities.json</key>
@@ -56,25 +76,53 @@
 			5JOhyIqnRU3hgtRq2zPleVd0iicAMRuOs/8C2q+wOgg=
 			</data>
 		</dict>
+		<key>Resources/data/constellations.js</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			XqVLgK3m1PjVFMxkMoIRQKAyLFrAy0yTmMkkxoCmgAE=
+			</data>
+		</dict>
+		<key>Resources/data/hyg_stars.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			5u3P3B6GUhhlx3peHjsyxbCTVWalgpETsXFtF+MumAc=
+			</data>
+		</dict>
+		<key>Resources/data/satellites_fallback.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			nW49TWz5uO37hL3FS2U8NwQJolnand6YwCEsUPB4Jvs=
+			</data>
+		</dict>
+		<key>Resources/data/stars.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			uGPqpNYkVTN2PixtnlvWkHeUyHR8Bx2Zn8I2Tvx2I28=
+			</data>
+		</dict>
 		<key>Resources/index.html</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			bjIqPwHM7rNk8jmUQE6Fme8USQbWeycu8aIWpba5FJU=
+			ePljoHARxa9qT0EG/PX8IQn/J3PtQDe7lJH+PzcxXqA=
 			</data>
 		</dict>
 		<key>Resources/main.js</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			9wRaRcEiQIdXwNQyFyw4HpIR6S9b9FwSOVL1T06kVJA=
+			xG2wSRcHJC3+CrvjIn4kIa76xsqVH0LaiFxCIfbeCtI=
 			</data>
 		</dict>
-		<key>Resources/star_catalog.js</key>
+		<key>Resources/satellite.min.js</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			VGXJS6inusiaUU1e/EUc5eIFOuOk9Xa5DE36qqgzi5E=
+			2KnReophyKkjfL1Ha6oeMf2jx3rrS7AUz+ve12avcEM=
 			</data>
 		</dict>
 		<key>Resources/style.css</key>

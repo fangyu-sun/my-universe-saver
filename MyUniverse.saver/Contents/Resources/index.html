@@ -31,12 +31,12 @@
         </div>
     </div>
     
-    <!-- 加载离线天文引擎与星表 -->
+    <!-- 加载离线天文与卫星引擎 -->
     <script src="astronomy.browser.min.js"></script>
-    <script src="star_catalog.js"></script>
-    <script src="astronomy_wrapper.js"></script>
+    <script src="satellite.min.js"></script>
     
-    <!-- 加载核心播报逻辑 -->
-    <script src="main.js?v=20260526_3"></script>
+    <!-- 加载核心播报逻辑 (使用 ES Module 以支持分离) -->
+    <script type="module" src="astronomy_wrapper.js"></script>
+    <script type="module" src="main.js?v=20260526_4"></script>
 </body>
 </html>
