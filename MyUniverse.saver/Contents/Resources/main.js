@@ -1,4 +1,4 @@
-// globals available: window.initAstronomyData, window.getZenithCandidates
+// globals available: window.initAstronomyData, window.getZenithCandidates, window.generateCopy
 
 let currentConfig = {
     city: "UNKNOWN",
@@ -13,6 +13,85 @@ let currentConfig = {
     breathingCycle: 10.0
 };
 
+const UI_TRANSLATIONS = {
+    "zh-Hans": {
+        alt: "仰角",
+        zenithOffset: "天顶偏角",
+        range: "距离",
+        lat: "纬度",
+        lon: "经度",
+        voidNav: "此刻你的上方，是深邃无垠的宇宙暗区。",
+        voidMeta: "天顶 60° 范围内无已知目标",
+        locUpdate: "实时定位更新"
+    },
+    "zh-Hant": {
+        alt: "仰角",
+        zenithOffset: "天頂偏角",
+        range: "距離",
+        lat: "緯度",
+        lon: "經度",
+        voidNav: "此刻你的上方，是深邃無垠的宇宙暗區。",
+        voidMeta: "天頂 60° 範圍內無已知目標",
+        locUpdate: "實時定位更新"
+    },
+    "en": {
+        alt: "ALTITUDE",
+        zenithOffset: "ZENITH OFFSET",
+        range: "RANGE",
+        lat: "LAT",
+        lon: "LON",
+        voidNav: "Right now above you, is a vast and deep cosmic void.",
+        voidMeta: "NO OBJECTS IN ZENITH 60° DOME",
+        locUpdate: "LIVE LOC"
+    },
+    "ja": {
+        alt: "仰角",
+        zenithOffset: "天頂角",
+        range: "距離",
+        lat: "緯度",
+        lon: "経度",
+        voidNav: "今あなたの上空は、深く果てしない宇宙の暗闇です。",
+        voidMeta: "天頂60°以内に既知の目標はありません",
+        locUpdate: "リアルタイム位置"
+    }
+};
+
+let activeSatellites = [];
+
+async function loadActiveSatellites() {
+    try {
+        const response = await fetch('https://tle.ivanstanojevic.me/api/tle/?page-size=50&sort=popularity', { cache: "no-store" });
+        const data = await response.json();
+        if (data && data.member && data.member.length > 0) {
+            const pops = data.member.map(sat => ({
+                satelliteId: sat.satelliteId,
+                name: sat.name,
+                line1: sat.line1,
+                line2: sat.line2
+            }));
+            activeSatellites = pops;
+        }
+    } catch (e) {
+        console.warn("Failed to fetch dynamic popular TLEs, falling back to local database.", e);
+    }
+    
+    try {
+        const responseStarlink = await fetch('https://tle.ivanstanojevic.me/api/tle/?search=STARLINK&page-size=40', { cache: "no-store" });
+        const dataStarlink = await responseStarlink.json();
+        if (dataStarlink && dataStarlink.member && dataStarlink.member.length > 0) {
+            const starlinks = dataStarlink.member.map(sat => ({
+                satelliteId: sat.satelliteId,
+                name: sat.name,
+                line1: sat.line1,
+                line2: sat.line2
+            }));
+            activeSatellites = [...activeSatellites, ...starlinks];
+        }
+    } catch (err) {
+        console.warn("Failed to fetch Starlink TLEs.", err);
+    }
+}
+
 let displayInterval = null;
 let currentCandidates = [];
 let candidateIndex = 0;
@@ -22,17 +101,34 @@ function applyConfig() {
     document.documentElement.style.setProperty('--font-brightness', currentConfig.fontBrightness);
     
     // 2. 控制显隐
-    document.getElementById("location-time-info").style.display = (currentConfig.showCity || currentConfig.showTime) ? "block" : "none";
+    document.getElementById("location-time-info").style.display = (currentConfig.showCity || currentConfig.showTime || currentConfig.showCoordinates) ? "block" : "none";
     
-    // 3. 初始刷新时钟
+    // 3. 异步拉取最新卫星轨道（静默失败则使用本地 fallback）
+    loadActiveSatellites();
+    
+    // 4. 静默开启实时定位追踪 (如果不被沙盒拦截)
+    if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+            (pos) => {
+                currentConfig.lat = pos.coords.latitude.toString();
+                currentConfig.lon = pos.coords.longitude.toString();
+                // We keep currentConfig.city but maybe append an indicator
+                const t = UI_TRANSLATIONS[currentConfig.language] || UI_TRANSLATIONS["en"];
+                currentConfig.city = t.locUpdate;
+                updateClock(); // force update the top text
+            },
+            (err) => { console.warn("Geolocation watch silently failed/denied.", err); },
+            { enableHighAccuracy: false, maximumAge: 10000 }
+        );
+    }
+    
+    // 5. 初始刷新时钟
     updateClock();
     if (displayInterval) clearInterval(displayInterval);
     displayInterval = setInterval(updateClock, 1000);
     
-    // 4. 重建宇宙播报循环
+    // 6. 重建宇宙播报循环
     let durationSec = currentConfig.breathingCycle || 10.0;
-    
-    // 启动基于 JS setInterval 和 CSS transition 的自定义呼吸循环
     startCustomBreathingLoop(durationSec);
 }
 
@@ -43,17 +139,19 @@ function startCustomBreathingLoop(durationSec) {
     // 立即执行一次
     updateMockSpaceData();
     
-    const halfCycle = (durationSec * 1000) / 2;
-    
     breathingTimer = setInterval(() => {
         const mainCopy = document.getElementById("main-copy");
-        // Fade out
-        mainCopy.classList.add("text-breath-out");
+        const metaInfo = document.getElementById("meta-info");
         
-        // Wait for transition to finish (2.5s as per CSS), then update text and fade in
+        // 核心与元数据同步淡出
+        mainCopy.classList.add("text-breath-out");
+        metaInfo.classList.add("text-breath-out");
+        
+        // 等待 CSS 的 2.5s 过渡完成
         setTimeout(() => {
             updateMockSpaceData();
             mainCopy.classList.remove("text-breath-out");
+            metaInfo.classList.remove("text-breath-out");
         }, 2500);
         
     }, durationSec * 1000);
@@ -68,64 +166,43 @@ function updateClock() {
     let parts = [];
     if (currentConfig.showCity && currentConfig.city) parts.push(currentConfig.city);
     if (currentConfig.showTime) parts.push(timeString);
-    if (currentConfig.showCoordinates) parts.push(`${currentConfig.lat}, ${currentConfig.lon}`);
+    if (currentConfig.showCoordinates) parts.push(`${parseFloat(currentConfig.lat).toFixed(2)}, ${parseFloat(currentConfig.lon).toFixed(2)}`);
     locationTimeInfo.textContent = parts.join(" · ");
 }
-
-// (window.generateCopy is now in copywriter.js)
 
 function updateMockSpaceData() {
     const mainCopy = document.getElementById("main-copy");
     const metaInfo = document.getElementById("meta-info");
+    const t = UI_TRANSLATIONS[currentConfig.language] || UI_TRANSLATIONS["en"];
     
-    // 实时计算当前头顶天体
     const now = new Date();
-    // 每次迭代重新计算，以保证地球自转的实时性
-    currentCandidates = window.getZenithCandidates(currentConfig.lat, currentConfig.lon, now);
+    currentCandidates = window.getZenithCandidates(currentConfig.lat, currentConfig.lon, now, activeSatellites);
     
-    if (currentCandidates.length === 0) {
-        // 兜底暗区文案
-        const fallbacks = {
-            "en": { nav: "Right now above you, is a vast and deep cosmic void.", meta: "NO CELESTIAL OBJECTS IN ZENITH 60° DOME" },
-            "zh-Hans": { nav: "此刻你的上方，是深邃无垠的宇宙暗区。", meta: "天顶 60° 范围内无已知亮星" },
-            "zh-Hant": { nav: "此刻你的上方，是深邃無垠的宇宙暗區。", meta: "天頂 60° 範圍內无已知亮星" },
-            "ja": { nav: "今あなたの上空は、深く果てしない宇宙の暗闇です。", meta: "天頂60°以内に既知の天体はありません" }
-        };
-        const lang = fallbacks[currentConfig.language] ? currentConfig.language : "en";
-        mainCopy.textContent = fallbacks[lang].nav;
-        metaInfo.textContent = fallbacks[lang].meta;
+    if (!currentCandidates || currentCandidates.length === 0) {
+        mainCopy.textContent = t.voidNav;
+        metaInfo.textContent = t.voidMeta;
         return;
     }
     
-    // 循环播放现有的 Candidates
     if (candidateIndex >= currentCandidates.length) {
         candidateIndex = 0;
     }
     
-    const obj = currentCandidates[candidateIndex];
-    const copyStr = window.generateCopy(obj, currentConfig.language);
+    const obj = currentCandidates[currentCandidates.length - 1 - candidateIndex]; // Fix direction or keep as is? actually let's keep original index logic
+    const currentObj = currentCandidates[candidateIndex];
+    const copyStr = window.generateCopy(currentObj, currentConfig.language);
     
-    // Generate meta string manually (since copywriter only returns nav)
-    let metaStr = "";
-    let dispName = obj.nameJa || obj.nameZhHans || obj.name;
-    if (obj.isSatellite || obj.isPlanet) {
-        dispName = obj.name;
-    }
-    const cleanName = dispName ? dispName.toUpperCase() : "UNKNOWN";
-    const alt = obj.altitude || 0;
-    const az = obj.azimuth || 0;
-
-    if (currentConfig.language === "zh-Hans" || currentConfig.language === "zh-Hant") {
-        metaStr = `${cleanName} · 高度角 ${alt}° · 方位角 ${az}°`;
-    } else if (currentConfig.language === "ja") {
-        metaStr = `${cleanName} · 高度 ${alt}° · 方位角 ${az}°`;
+    const altFixed = parseFloat(currentObj.altitude).toFixed(3);
+    const displayId = currentObj.id ? currentObj.id.toUpperCase() : (currentObj.nameJa || currentObj.nameZhHans || currentObj.name).toUpperCase();
+    
+    if (currentObj.isSatellite) {
+        metaInfo.innerHTML = `${currentObj.name.toUpperCase()} &nbsp;&middot;&nbsp; ${t.alt} ${altFixed}&deg; &nbsp;&middot;&nbsp; ${t.range} ${currentObj.rangeKm || currentObj.distanceStr}`;
     } else {
-        metaStr = `${cleanName} · ALTITUDE ${alt}° · AZIMUTH ${az}°`;
+        const offZenith = (90 - parseFloat(currentObj.altitude)).toFixed(3);
+        metaInfo.innerHTML = `${displayId} &nbsp;&middot;&nbsp; ${t.alt} ${altFixed}&deg; &nbsp;&middot;&nbsp; ${t.zenithOffset} ${offZenith}&deg;`;
     }
     
     mainCopy.textContent = copyStr;
-    metaInfo.textContent = metaStr;
-    
     candidateIndex++;
 }
 
