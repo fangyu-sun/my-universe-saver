@@ -54,7 +54,7 @@ class ConfigWindowController: NSObject, NSComboBoxDelegate, NSComboBoxDataSource
     }
     
     private func setupWindow() {
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 450, height: 530),
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 570),
                               styleMask: [.titled],
                               backing: .buffered,
                               defer: false)
@@ -67,10 +67,10 @@ class ConfigWindowController: NSObject, NSComboBoxDelegate, NSComboBoxDataSource
         window.contentView = view
         
         // --- 1. OBSERVER VANTAGE ---
-        createSectionTitle("OBSERVER VANTAGE", y: 480, view: view)
+        createSectionTitle("OBSERVER VANTAGE", y: 520, view: view)
         
-        createLabel(title: "Location:", y: 440, view: view)
-        cityComboBox.frame = NSRect(x: 130, y: 440, width: 200, height: 24)
+        createLabel(title: "Location:", y: 480, view: view)
+        cityComboBox.frame = NSRect(x: 160, y: 480, width: 190, height: 24)
         cityComboBox.usesDataSource = true
         cityComboBox.dataSource = self
         cityComboBox.delegate = self
@@ -80,27 +80,27 @@ class ConfigWindowController: NSObject, NSComboBoxDelegate, NSComboBoxDataSource
         
         autoLocateBtn.title = "Auto Locate"
         autoLocateBtn.bezelStyle = .rounded
-        autoLocateBtn.frame = NSRect(x: 340, y: 438, width: 100, height: 28)
+        autoLocateBtn.frame = NSRect(x: 350, y: 478, width: 100, height: 28)
         autoLocateBtn.target = self
         autoLocateBtn.action = #selector(autoLocateClicked)
         view.addSubview(autoLocateBtn)
         
-        createLabel(title: "Lat / Lon:", y: 400, view: view)
-        manualLatField.frame = NSRect(x: 130, y: 400, width: 90, height: 22)
+        createLabel(title: "Lat / Lon:", y: 440, view: view)
+        manualLatField.frame = NSRect(x: 160, y: 440, width: 90, height: 22)
         manualLatField.placeholderString = "Lat"
         manualLatField.stringValue = LocationManager.shared.manualLat
         view.addSubview(manualLatField)
         
-        manualLonField.frame = NSRect(x: 230, y: 400, width: 90, height: 22)
+        manualLonField.frame = NSRect(x: 260, y: 440, width: 90, height: 22)
         manualLonField.placeholderString = "Lon"
         manualLonField.stringValue = LocationManager.shared.manualLon
         view.addSubview(manualLonField)
         
         // --- 2. RHYTHM & FLOW ---
-        createSectionTitle("RHYTHM & FLOW", y: 340, view: view)
+        createSectionTitle("RHYTHM & FLOW", y: 380, view: view)
         
-        createLabel(title: "Breathing Cycle:", y: 300, view: view)
-        breathingSlider.frame = NSRect(x: 130, y: 300, width: 200, height: 24)
+        createLabel(title: "Breathing Cycle:", y: 340, view: view)
+        breathingSlider.frame = NSRect(x: 160, y: 340, width: 190, height: 24)
         breathingSlider.minValue = 3.0
         breathingSlider.maxValue = 30.0
         breathingSlider.doubleValue = LocationManager.shared.breathingCycle
@@ -108,7 +108,7 @@ class ConfigWindowController: NSObject, NSComboBoxDelegate, NSComboBoxDataSource
         breathingSlider.action = #selector(sliderChanged)
         view.addSubview(breathingSlider)
         
-        breathingLabel.frame = NSRect(x: 340, y: 300, width: 60, height: 20)
+        breathingLabel.frame = NSRect(x: 355, y: 340, width: 60, height: 20)
         breathingLabel.isEditable = false
         breathingLabel.isBordered = false
         breathingLabel.drawsBackground = false
@@ -119,10 +119,10 @@ class ConfigWindowController: NSObject, NSComboBoxDelegate, NSComboBoxDataSource
         updateBreathingLabel()
         
         // --- 3. AESTHETICS ---
-        createSectionTitle("AESTHETICS", y: 240, view: view)
+        createSectionTitle("AESTHETICS", y: 280, view: view)
         
-        createLabel(title: "Language:", y: 200, view: view)
-        languagePopUp.frame = NSRect(x: 130, y: 200, width: 200, height: 24)
+        createLabel(title: "Language:", y: 240, view: view)
+        languagePopUp.frame = NSRect(x: 160, y: 240, width: 200, height: 24)
         for map in langMap {
             languagePopUp.addItem(withTitle: map.0)
         }
@@ -132,36 +132,36 @@ class ConfigWindowController: NSObject, NSComboBoxDelegate, NSComboBoxDataSource
         }
         view.addSubview(languagePopUp)
         
-        createLabel(title: "Luminance:", y: 160, view: view)
-        brightnessSlider.frame = NSRect(x: 130, y: 160, width: 200, height: 24)
+        createLabel(title: "Luminance:", y: 200, view: view)
+        brightnessSlider.frame = NSRect(x: 160, y: 200, width: 190, height: 24)
         brightnessSlider.minValue = 0.2
         brightnessSlider.maxValue = 1.0
         brightnessSlider.doubleValue = LocationManager.shared.fontBrightness
         view.addSubview(brightnessSlider)
         
         // --- 4. MINIMALISM ---
-        createSectionTitle("MINIMALISM", y: 100, view: view)
+        createSectionTitle("MINIMALISM", y: 140, view: view)
         
-        showCityCheck.frame = NSRect(x: 130, y: 65, width: 250, height: 22)
+        showCityCheck.frame = NSRect(x: 160, y: 105, width: 250, height: 22)
         showCityCheck.state = LocationManager.shared.showCity ? .on : .off
         view.addSubview(showCityCheck)
         
-        showTimeCheck.frame = NSRect(x: 130, y: 40, width: 250, height: 22)
+        showTimeCheck.frame = NSRect(x: 160, y: 80, width: 250, height: 22)
         showTimeCheck.state = LocationManager.shared.showTime ? .on : .off
         view.addSubview(showTimeCheck)
         
-        showCoordsCheck.frame = NSRect(x: 130, y: 15, width: 250, height: 22)
+        showCoordsCheck.frame = NSRect(x: 160, y: 55, width: 250, height: 22)
         showCoordsCheck.state = LocationManager.shared.showCoordinates ? .on : .off
         view.addSubview(showCoordsCheck)
         
         // --- Buttons ---
         let cancelButton = NSButton(title: "Cancel", target: self, action: #selector(cancelClicked))
-        cancelButton.frame = NSRect(x: 180, y: 10, width: 100, height: 32)
+        cancelButton.frame = NSRect(x: 210, y: 15, width: 100, height: 32)
         cancelButton.bezelStyle = .rounded
         view.addSubview(cancelButton)
         
         let saveButton = NSButton(title: "Save & Apply", target: self, action: #selector(saveClicked))
-        saveButton.frame = NSRect(x: 290, y: 10, width: 120, height: 32)
+        saveButton.frame = NSRect(x: 320, y: 15, width: 120, height: 32)
         saveButton.bezelStyle = .rounded
         saveButton.keyEquivalent = "\r"
         view.addSubview(saveButton)
@@ -176,14 +176,14 @@ class ConfigWindowController: NSObject, NSComboBoxDelegate, NSComboBoxDataSource
         label.textColor = .white
         view.addSubview(label)
         
-        let box = NSBox(frame: NSRect(x: 30, y: y - 5, width: 390, height: 1))
+        let box = NSBox(frame: NSRect(x: 30, y: y - 5, width: 420, height: 1))
         box.boxType = .separator
         view.addSubview(box)
     }
     
     private func createLabel(title: String, y: CGFloat, view: NSView) {
         let label = NSTextField(labelWithString: title)
-        label.frame = NSRect(x: 20, y: y, width: 100, height: 20)
+        label.frame = NSRect(x: 30, y: y, width: 120, height: 20)
         label.alignment = .right
         if #available(macOS 10.10, *) {
             label.textColor = .secondaryLabelColor
