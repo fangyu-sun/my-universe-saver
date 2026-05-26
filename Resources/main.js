@@ -23,31 +23,44 @@ function applyConfig() {
     
     // 2. 控制显隐
     document.getElementById("location-time-info").style.display = (currentConfig.showCity || currentConfig.showTime) ? "block" : "none";
-    document.getElementById("coord-display").style.display = currentConfig.showCoordinates ? "block" : "none";
     
     // 3. 初始刷新时钟
     updateClock();
     if (displayInterval) clearInterval(displayInterval);
     displayInterval = setInterval(updateClock, 1000);
     
-    // 4. 重建宇宙播报循环 (与动画至暗时刻咬合)
+    // 4. 重建宇宙播报循环
     let durationSec = currentConfig.breathingCycle || 10.0;
     
-    // 设置 CSS 呼吸周期
-    document.documentElement.style.setProperty('--breathe-duration', `${durationSec}s`);
-    
-    // 首次立即更新
-    updateMockSpaceData();
+    // 启动基于 JS setInterval 和 CSS transition 的自定义呼吸循环
+    startCustomBreathingLoop(durationSec);
 }
 
-// 监听动画迭代事件：当动画回到 100%（至暗时刻）时切换文本
-document.getElementById("main-narrative").addEventListener("animationiteration", () => {
+let breathingTimer = null;
+function startCustomBreathingLoop(durationSec) {
+    if (breathingTimer) clearInterval(breathingTimer);
+    
+    // 立即执行一次
     updateMockSpaceData();
-});
+    
+    const halfCycle = (durationSec * 1000) / 2;
+    
+    breathingTimer = setInterval(() => {
+        const mainCopy = document.getElementById("main-copy");
+        // Fade out
+        mainCopy.classList.add("text-breath-out");
+        
+        // Wait for transition to finish (2.5s as per CSS), then update text and fade in
+        setTimeout(() => {
+            updateMockSpaceData();
+            mainCopy.classList.remove("text-breath-out");
+        }, 2500);
+        
+    }, durationSec * 1000);
+}
 
 function updateClock() {
     const locationTimeInfo = document.getElementById("location-time-info");
-    const coordDisplay = document.getElementById("coord-display");
     
     const now = new Date();
     const timeString = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
@@ -55,9 +68,8 @@ function updateClock() {
     let parts = [];
     if (currentConfig.showCity && currentConfig.city) parts.push(currentConfig.city);
     if (currentConfig.showTime) parts.push(timeString);
+    if (currentConfig.showCoordinates) parts.push(`${currentConfig.lat}, ${currentConfig.lon}`);
     locationTimeInfo.textContent = parts.join(" · ");
-    
-    coordDisplay.textContent = `${currentConfig.lat}, ${currentConfig.lon}`;
 }
 
 window.generateCopy = function(obj, langCode) {
@@ -119,7 +131,7 @@ window.generateCopy = function(obj, langCode) {
 };
 
 function updateMockSpaceData() {
-    const mainNarrative = document.getElementById("main-narrative");
+    const mainCopy = document.getElementById("main-copy");
     const metaInfo = document.getElementById("meta-info");
     
     // 实时计算当前头顶天体
@@ -136,7 +148,7 @@ function updateMockSpaceData() {
             "ja": { nav: "今あなたの上空は、深く果てしない宇宙の暗闇です。", meta: "天頂60°以内に既知の天体はありません" }
         };
         const lang = fallbacks[currentConfig.language] ? currentConfig.language : "en";
-        mainNarrative.textContent = fallbacks[lang].nav;
+        mainCopy.textContent = fallbacks[lang].nav;
         metaInfo.textContent = fallbacks[lang].meta;
         return;
     }
@@ -149,7 +161,7 @@ function updateMockSpaceData() {
     const obj = currentCandidates[candidateIndex];
     const copy = window.generateCopy(obj, currentConfig.language);
     
-    mainNarrative.textContent = copy.nav;
+    mainCopy.textContent = copy.nav;
     metaInfo.textContent = copy.meta;
     
     candidateIndex++;

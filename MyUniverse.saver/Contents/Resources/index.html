@@ -8,26 +8,18 @@
 </head>
 <body>
     <div id="app">
-        <!-- 核心播报界面，零交互，默认直接显示 -->
-        <div id="broadcaster">
+        <div id="broadcaster" class="screen active">
             <!-- 顶部：地点与时间 -->
-            <div id="top-meta">
-                <div id="location-time-info">-- · --:--</div>
-                <div id="coord-display">0.0, 0.0</div>
-            </div>
+            <div id="location-time-info">-- · --:--</div>
             
             <!-- 中间核心点缀 -->
             <div class="zenith-dot"></div>
             
             <!-- 中间：宇宙叙事主文案 -->
-            <div id="main-narrative-container">
-                <h1 id="main-narrative"></h1>
-            </div>
+            <h1 id="main-copy"></h1>
             
             <!-- 底部：技术状态行 -->
-            <div id="bottom-status">
-                <div id="meta-info">WAITING FOR TELEMETRY...</div>
-            </div>
+            <div id="meta-info">WAITING FOR TELEMETRY...</div>
         </div>
     </div>
     
