@@ -14,126 +14,73 @@ let displayInterval = null;
 let broadcastInterval = null;
 let mockIndex = 0;
 
-// Mock 天体数据
-const mockCelestialObject = {
-    type: "star",
-    constellation: "Columba",
-    constellationZhHans: "天鸽座",
-    constellationZhHant: "天鴿座",
-    constellationJa: "はと座",
-    distanceLy: 421.9,
-    altitude: 86.9,
-    zenithOffset: 3.1,
-    catalogId: "HIP 12345"
-};
-
-// 多语言文案库
-const translations = {
-    "en": {
-        wait: "WAITING FOR TELEMETRY...",
-        narrative: `Above you, a star in ${mockCelestialObject.constellation} is shining, ${mockCelestialObject.distanceLy} light-years away.`,
-        mock: [
-            `${mockCelestialObject.catalogId} · ALTITUDE ${mockCelestialObject.altitude}° · ZENITH OFFSET ${mockCelestialObject.zenithOffset}°`,
-            "ISS (ZARYA) · ALTITUDE 45.2° · DISTANCE 800km",
-            "HUBBLE SPACE TELESCOPE · ALTITUDE 30.5° · DISTANCE 540km"
-        ]
-    },
-    "zh-Hans": {
-        wait: "等待遥测数据...",
-        narrative: `你的上空，一颗属于${mockCelestialObject.constellationZhHans}的恒星正在发光，距离 ${mockCelestialObject.distanceLy} 光年。`,
-        mock: [
-            `${mockCelestialObject.catalogId} · 高度角 ${mockCelestialObject.altitude}° · 天顶偏移 ${mockCelestialObject.zenithOffset}°`,
-            "国际空间站 (ZARYA) · 仰角 45.2° · 距离 800km",
-            "哈勃空间望远镜 · 仰角 30.5° · 距离 540km"
-        ]
-    },
-    "zh-Hant": {
-        wait: "等待遙測數據...",
-        narrative: `你的上空，一顆屬於${mockCelestialObject.constellationZhHant}的恆星正在發光，距離 ${mockCelestialObject.distanceLy} 光年。`,
-        mock: [
-            `${mockCelestialObject.catalogId} · 高度角 ${mockCelestialObject.altitude}° · 天頂偏移 ${mockCelestialObject.zenithOffset}°`,
-            "國際太空站 (ZARYA) · 仰角 45.2° · 距離 800km",
-            "哈伯太空望遠鏡 · 仰角 30.5° · 距離 540km"
-        ]
-    },
-    "ja": {
-        wait: "テレメトリ待機中...",
-        narrative: `あなたの上空で、${mockCelestialObject.constellationJa}に属する恒星が光っています。距離は${mockCelestialObject.distanceLy}光年です。`,
-        mock: [
-            `${mockCelestialObject.catalogId} · 高度 ${mockCelestialObject.altitude}° · 天頂オフセット ${mockCelestialObject.zenithOffset}°`,
-            "国際宇宙ステーション (ZARYA) · 高度 45.2° · 距離 800km",
-            "ハッブル宇宙望遠鏡 · 高度 30.5° · 距離 540km"
-        ]
-    }
-};
-
-window.updateConfig = function(config) {
-    currentConfig = Object.assign(currentConfig, config);
-    applyConfig();
-};
-
-function applyConfig() {
-    // 1. 设置亮度
-    document.documentElement.style.setProperty('--font-brightness', currentConfig.fontBrightness);
-    
-    // 2. 控制显隐
-    document.getElementById("location-time-info").style.display = (currentConfig.showCity || currentConfig.showTime) ? "block" : "none";
-    document.getElementById("coord-display").style.display = currentConfig.showCoordinates ? "block" : "none";
-    
-    // 3. 初始刷新时钟
-    updateClock();
-    if (displayInterval) clearInterval(displayInterval);
-    displayInterval = setInterval(updateClock, 1000);
-    
-    // 4. 重建宇宙播报循环 (与动画至暗时刻咬合)
-    let durationStr = "10s"; // normal
-    if (currentConfig.displayFrequency === "fast") durationStr = "3s";
-    if (currentConfig.displayFrequency === "slow") durationStr = "30s";
-    
-    // 设置 CSS 呼吸周期
-    document.documentElement.style.setProperty('--breathe-duration', durationStr);
-    
-    // 首次立即更新
-    updateMockSpaceData();
-}
-
-// 监听动画迭代事件：当动画回到 100%（至暗时刻）时切换文本
-document.getElementById("main-narrative").addEventListener("animationiteration", () => {
-    updateMockSpaceData();
-});
-
-function updateClock() {
-    const locationTimeInfo = document.getElementById("location-time-info");
-    const coordDisplay = document.getElementById("coord-display");
-    
-    const now = new Date();
-    const timeString = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-    
-    let parts = [];
-    if (currentConfig.showCity && currentConfig.city) parts.push(currentConfig.city);
-    if (currentConfig.showTime) parts.push(timeString);
-    locationTimeInfo.textContent = parts.join(" · ");
-    
-    coordDisplay.textContent = `${currentConfig.lat}, ${currentConfig.lon}`;
-}
+let currentCandidates = [];
+let candidateIndex = 0;
 
 function updateMockSpaceData() {
     const mainNarrative = document.getElementById("main-narrative");
     const metaInfo = document.getElementById("meta-info");
     
-    const lang = translations[currentConfig.language] ? currentConfig.language : "en";
-    const dataList = translations[lang].mock;
-    const narrativeText = translations[lang].narrative;
+    // 实时计算当前头顶天体
+    const now = new Date();
+    // 每次迭代重新计算，以保证地球自转的实时性
+    currentCandidates = getZenithCandidates(currentConfig.lat, currentConfig.lon, now);
     
-    // 更新主叙事文案
-    mainNarrative.textContent = narrativeText;
+    if (currentCandidates.length === 0) {
+        // 兜底暗区文案
+        const fallbacks = {
+            "en": { nav: "Right now above you, is a vast and deep cosmic void.", meta: "NO CELESTIAL OBJECTS IN ZENITH 60° DOME" },
+            "zh-Hans": { nav: "此刻你的上方，是深邃无垠的宇宙暗区。", meta: "天顶 60° 范围内无已知亮星" },
+            "zh-Hant": { nav: "此刻你的上方，是深邃無垠的宇宙暗區。", meta: "天頂 60° 範圍內無已知亮星" },
+            "ja": { nav: "今あなたの上空は、深く果てしない宇宙の暗闇です。", meta: "天頂60°以内に既知の輝星はありません" }
+        };
+        const lang = fallbacks[currentConfig.language] ? currentConfig.language : "en";
+        mainNarrative.textContent = fallbacks[lang].nav;
+        metaInfo.textContent = fallbacks[lang].meta;
+        return;
+    }
     
-    // 更新底部技术行
-    metaInfo.textContent = dataList[mockIndex];
-    mockIndex = (mockIndex + 1) % dataList.length;
+    // 循环播放现有的 Candidates
+    if (candidateIndex >= currentCandidates.length) {
+        candidateIndex = 0;
+    }
+    
+    const obj = currentCandidates[candidateIndex];
+    
+    // 组装语言文案
+    let name = obj.name;
+    let constellation = obj.constellation;
+    let distStr = "";
+    
+    if (currentConfig.language === "zh-Hans") {
+        name = obj.nameZhHans || obj.name;
+        constellation = obj.constellationZhHans || obj.constellation;
+        distStr = obj.distLy ? `距离 ${obj.distLy} 光年。` : "在我们的太阳系中。";
+        mainNarrative.textContent = `你的上空，一颗属于${constellation}的${obj.type === 'star' ? '恒星' : '行星'}正在发光，${distStr}`;
+        metaInfo.textContent = `${name.toUpperCase()} · 高度角 ${obj.altitude}° · 方位角 ${obj.azimuth}°`;
+    } else if (currentConfig.language === "zh-Hant") {
+        name = obj.nameZhHant || obj.name;
+        constellation = obj.constellationZhHant || obj.constellation;
+        distStr = obj.distLy ? `距離 ${obj.distLy} 光年。` : "在我們的太陽系中。";
+        mainNarrative.textContent = `你的上空，一顆屬於${constellation}的${obj.type === 'star' ? '恆星' : '行星'}正在發光，${distStr}`;
+        metaInfo.textContent = `${name.toUpperCase()} · 高度角 ${obj.altitude}° · 方位角 ${obj.azimuth}°`;
+    } else if (currentConfig.language === "ja") {
+        name = obj.nameJa || obj.name;
+        constellation = obj.constellationJa || obj.constellation;
+        distStr = obj.distLy ? `距離は${obj.distLy}光年です。` : "私たちの太陽系にあります。";
+        mainNarrative.textContent = `あなたの上空で、${constellation}に属する${obj.type === 'star' ? '恒星' : '惑星'}が光っています。${distStr}`;
+        metaInfo.textContent = `${name.toUpperCase()} · 高度 ${obj.altitude}° · 方位角 ${obj.azimuth}°`;
+    } else {
+        // English Default
+        distStr = obj.distLy ? `${obj.distLy} light-years away.` : "in our solar system.";
+        mainNarrative.textContent = `Above you, a ${obj.type} in ${constellation} is shining, ${distStr}`;
+        metaInfo.textContent = `${name.toUpperCase()} · ALTITUDE ${obj.altitude}° · AZIMUTH ${obj.azimuth}°`;
+    }
+    
+    candidateIndex++;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     // 设置默认等待文案
-    document.getElementById("meta-info").textContent = translations["en"].wait;
+    document.getElementById("meta-info").textContent = "WAITING FOR TELEMETRY...";
 });

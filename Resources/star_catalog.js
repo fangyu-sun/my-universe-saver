@@ -1,0 +1,30 @@
+const starCatalog = [
+    // --- Planets ---
+    // Planet calculations don't need RA/Dec, they use internal orbital models
+    { id: "Mercury", type: "planet", name: "Mercury", nameZhHans: "水星", nameZhHant: "水星", nameJa: "水星", constellation: "Solar System", constellationZhHans: "太阳系", constellationZhHant: "太陽系", constellationJa: "太陽系" },
+    { id: "Venus", type: "planet", name: "Venus", nameZhHans: "金星", nameZhHant: "金星", nameJa: "金星", constellation: "Solar System", constellationZhHans: "太阳系", constellationZhHant: "太陽系", constellationJa: "太陽系" },
+    { id: "Mars", type: "planet", name: "Mars", nameZhHans: "火星", nameZhHant: "火星", nameJa: "火星", constellation: "Solar System", constellationZhHans: "太阳系", constellationZhHant: "太陽系", constellationJa: "太陽系" },
+    { id: "Jupiter", type: "planet", name: "Jupiter", nameZhHans: "木星", nameZhHant: "木星", nameJa: "木星", constellation: "Solar System", constellationZhHans: "太阳系", constellationZhHant: "太陽系", constellationJa: "太陽系" },
+    { id: "Saturn", type: "planet", name: "Saturn", nameZhHans: "土星", nameZhHant: "土星", nameJa: "土星", constellation: "Solar System", constellationZhHans: "太阳系", constellationZhHant: "太陽系", constellationJa: "太陽系" },
+
+    // --- Bright Stars ---
+    { id: "Sirius", type: "star", name: "Sirius", nameZhHans: "天狼星", nameZhHant: "天狼星", nameJa: "シリウス", constellation: "Canis Major", constellationZhHans: "大犬座", constellationZhHant: "大犬座", constellationJa: "おおいぬ座", ra: 6.752, dec: -16.716, distLy: 8.6 },
+    { id: "Canopus", type: "star", name: "Canopus", nameZhHans: "老人星", nameZhHant: "老人星", nameJa: "カノープス", constellation: "Carina", constellationZhHans: "船底座", constellationZhHant: "船底座", constellationJa: "りゅうこつ座", ra: 6.399, dec: -52.695, distLy: 310 },
+    { id: "AlphaCen", type: "star", name: "Rigel Kentaurus", nameZhHans: "南门二", nameZhHant: "南門二", nameJa: "アルファ・ケンタウリ", constellation: "Centaurus", constellationZhHans: "半人马座", constellationZhHant: "半人馬座", constellationJa: "ケンタウルス座", ra: 14.660, dec: -60.833, distLy: 4.37 },
+    { id: "Arcturus", type: "star", name: "Arcturus", nameZhHans: "大角星", nameZhHant: "大角星", nameJa: "アークトゥルス", constellation: "Boötes", constellationZhHans: "牧夫座", constellationZhHant: "牧夫座", constellationJa: "うしかい座", ra: 14.261, dec: 19.182, distLy: 37 },
+    { id: "Vega", type: "star", name: "Vega", nameZhHans: "织女星", nameZhHant: "織女星", nameJa: "ベガ", constellation: "Lyra", constellationZhHans: "天琴座", constellationZhHant: "天琴座", constellationJa: "こと座", ra: 18.615, dec: 38.783, distLy: 25 },
+    { id: "Capella", type: "star", name: "Capella", nameZhHans: "五车二", nameZhHant: "五車二", nameJa: "カペラ", constellation: "Auriga", constellationZhHans: "御夫座", constellationZhHant: "御夫座", constellationJa: "ぎょしゃ座", ra: 5.278, dec: 45.998, distLy: 42.9 },
+    { id: "Rigel", type: "star", name: "Rigel", nameZhHans: "参宿七", nameZhHant: "參宿七", nameJa: "リゲル", constellation: "Orion", constellationZhHans: "猎户座", constellationZhHant: "獵戶座", constellationJa: "オリオン座", ra: 5.242, dec: -8.201, distLy: 860 },
+    { id: "Procyon", type: "star", name: "Procyon", nameZhHans: "南河三", nameZhHant: "南河三", nameJa: "プロキオン", constellation: "Canis Minor", constellationZhHans: "小犬座", constellationZhHant: "小犬座", constellationJa: "こいぬ座", ra: 7.655, dec: 5.224, distLy: 11.4 },
+    { id: "Achernar", type: "star", name: "Achernar", nameZhHans: "水委一", nameZhHant: "水委一", nameJa: "アケルナル", constellation: "Eridanus", constellationZhHans: "波江座", constellationZhHant: "波江座", constellationJa: "エリダヌス座", ra: 1.628, dec: -57.236, distLy: 139 },
+    { id: "Betelgeuse", type: "star", name: "Betelgeuse", nameZhHans: "参宿四", nameZhHant: "參宿四", nameJa: "ベテルギウス", constellation: "Orion", constellationZhHans: "猎户座", constellationZhHant: "獵戶座", constellationJa: "オリオン座", ra: 5.919, dec: 7.407, distLy: 640 },
+    { id: "Hadar", type: "star", name: "Hadar", nameZhHans: "马腹一", nameZhHant: "馬腹一", nameJa: "ハダル", constellation: "Centaurus", constellationZhHans: "半人马座", constellationZhHant: "半人馬座", constellationJa: "ケンタウルス座", ra: 14.063, dec: -60.373, distLy: 390 },
+    { id: "Altair", type: "star", name: "Altair", nameZhHans: "河鼓二", nameZhHant: "河鼓二", nameJa: "アルタイル", constellation: "Aquila", constellationZhHans: "天鹰座", constellationZhHant: "天鷹座", constellationJa: "わし座", ra: 19.846, dec: 8.868, distLy: 16.7 },
+    { id: "Aldebaran", type: "star", name: "Aldebaran", nameZhHans: "毕宿五", nameZhHant: "畢宿五", nameJa: "アルデバラン", constellation: "Taurus", constellationZhHans: "金牛座", constellationZhHant: "金牛座", constellationJa: "おうし座", ra: 4.598, dec: 16.509, distLy: 65 },
+    { id: "Antares", type: "star", name: "Antares", nameZhHans: "心宿二", nameZhHant: "心宿二", nameJa: "アンタレス", constellation: "Scorpius", constellationZhHans: "天蝎座", constellationZhHant: "天蠍座", constellationJa: "さそり座", ra: 16.490, dec: -26.432, distLy: 550 },
+    { id: "Spica", type: "star", name: "Spica", nameZhHans: "角宿一", nameZhHant: "角宿一", nameJa: "スピカ", constellation: "Virgo", constellationZhHans: "室女座", constellationZhHant: "室女座", constellationJa: "おとめ座", ra: 13.419, dec: -11.161, distLy: 250 },
+    { id: "Pollux", type: "star", name: "Pollux", nameZhHans: "北河三", nameZhHant: "北河三", nameJa: "ポルックス", constellation: "Gemini", constellationZhHans: "双子座", constellationZhHant: "雙子座", constellationJa: "ふたご座", ra: 7.755, dec: 28.026, distLy: 34 },
+    { id: "Fomalhaut", type: "star", name: "Fomalhaut", nameZhHans: "北落师门", nameZhHant: "北落師門", nameJa: "フォーマルハウト", constellation: "Piscis Austrinus", constellationZhHans: "南鱼座", constellationZhHant: "南魚座", constellationJa: "みなみのうお座", ra: 22.960, dec: -29.622, distLy: 25 },
+    { id: "Deneb", type: "star", name: "Deneb", nameZhHans: "天津四", nameZhHant: "天津四", nameJa: "デネブ", constellation: "Cygnus", constellationZhHans: "天鹅座", constellationZhHant: "天鵝座", constellationJa: "はくちょう座", ra: 20.690, dec: 45.280, distLy: 2600 },
+    { id: "Regulus", type: "star", name: "Regulus", nameZhHans: "轩辕十四", nameZhHant: "軒轅十四", nameJa: "レグルス", constellation: "Leo", constellationZhHans: "狮子座", constellationZhHant: "獅子座", constellationJa: "しし座", ra: 10.139, dec: 11.967, distLy: 79 }
+];
