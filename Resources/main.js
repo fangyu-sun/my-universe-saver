@@ -1,9 +1,9 @@
 // globals available: window.initAstronomyData, window.getZenithCandidates, window.generateCopy
 
 let currentConfig = {
-    city: "UNKNOWN",
-    lat: "0.0",
-    lon: "0.0",
+    city: "Beijing",
+    lat: "39.9042",
+    lon: "116.4074",
     language: "en",
     fontBrightness: 0.8,
     displayFrequency: "normal",

@@ -8,7 +8,7 @@ class LocationManager {
     
     // --- Location Data ---
     var selectedCity: String {
-        get { return defaults?.string(forKey: "selectedCity") ?? "Unknown City" }
+        get { return defaults?.string(forKey: "selectedCity") ?? "Beijing" }
         set { defaults?.set(newValue, forKey: "selectedCity"); defaults?.synchronize() }
     }
     
@@ -23,12 +23,12 @@ class LocationManager {
     }
     
     var cityLatitude: String {
-        get { return defaults?.string(forKey: "cityLatitude") ?? "0.0" }
+        get { return defaults?.string(forKey: "cityLatitude") ?? "39.9042" }
         set { defaults?.set(newValue, forKey: "cityLatitude"); defaults?.synchronize() }
     }
     
     var cityLongitude: String {
-        get { return defaults?.string(forKey: "cityLongitude") ?? "0.0" }
+        get { return defaults?.string(forKey: "cityLongitude") ?? "116.4074" }
         set { defaults?.set(newValue, forKey: "cityLongitude"); defaults?.synchronize() }
     }
     
