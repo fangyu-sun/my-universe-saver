@@ -27,46 +27,83 @@ body, html {
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    position: relative;
+    padding: 60px 0;
+    box-sizing: border-box;
 }
 
-/* 顶部/中间显示的城市和时间 */
+/* 顶部：地点与时间 */
+#top-meta {
+    text-align: center;
+}
+
 #location-time-info {
     font-size: 1.2rem;
     letter-spacing: 2px;
     color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 20px;
+    margin-bottom: 8px;
     font-weight: 300;
 }
 
-/* 核心点缀 */
+#coord-display {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 1px;
+}
+
+/* 中间：核心点缀与主文案 */
 .zenith-dot {
     width: 6px;
     height: 6px;
     background-color: #fff;
     border-radius: 50%;
-    margin-bottom: 20px;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-}
-
-/* 主文案预留位置 */
-#main-copy {
-    font-size: 2.5rem;
-    font-weight: 300;
-    letter-spacing: 1px;
-    text-align: center;
-    margin: 20px 0;
-    min-height: 4rem;
-}
-
-/* 底部状态 */
-#meta-info {
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
     position: absolute;
-    bottom: 40px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100px);
+    animation: pulse 4s infinite ease-in-out;
+}
+
+#main-narrative-container {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    max-width: 900px;
+    text-align: center;
+}
+
+#main-narrative {
+    font-size: 2.2rem;
+    font-weight: 200;
+    line-height: 1.5;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.9);
+    animation: breathe 8s infinite ease-in-out;
+}
+
+/* 底部：技术状态行 */
+#bottom-status {
+    text-align: center;
+}
+
+#meta-info {
     font-size: 0.9rem;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
     color: rgba(255, 255, 255, 0.5);
     text-transform: uppercase;
+}
+
+/* 动画效果 */
+@keyframes breathe {
+    0%, 100% { opacity: 0.7; transform: scale(0.98); }
+    50% { opacity: 1.0; transform: scale(1.0); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; box-shadow: 0 0 8px rgba(255,255,255,0.5); }
+    50% { opacity: 1.0; box-shadow: 0 0 20px rgba(255,255,255,1.0); }
 }

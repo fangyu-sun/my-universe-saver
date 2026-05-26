@@ -14,46 +14,55 @@ let displayInterval = null;
 let broadcastInterval = null;
 let mockIndex = 0;
 
+// Mock 天体数据
+const mockCelestialObject = {
+    type: "star",
+    constellation: "Columba",
+    constellationZhHans: "天鸽座",
+    constellationZhHant: "天鴿座",
+    constellationJa: "はと座",
+    distanceLy: 421.9,
+    altitude: 86.9,
+    zenithOffset: 3.1,
+    catalogId: "HIP 12345"
+};
+
 // 多语言文案库
 const translations = {
     "en": {
         wait: "WAITING FOR TELEMETRY...",
+        narrative: `Above you, a star in ${mockCelestialObject.constellation} is shining, ${mockCelestialObject.distanceLy} light-years away.`,
         mock: [
+            `${mockCelestialObject.catalogId} · ALTITUDE ${mockCelestialObject.altitude}° · ZENITH OFFSET ${mockCelestialObject.zenithOffset}°`,
             "ISS (ZARYA) · ALTITUDE 45.2° · DISTANCE 800km",
-            "STARLINK-1234 · ALTITUDE 60.1° · DISTANCE 550km",
-            "HUBBLE SPACE TELESCOPE · ALTITUDE 30.5° · DISTANCE 540km",
-            "SIRIUS (ALPHA CANIS MAJORIS) · ALTITUDE 75.8°",
-            "JUPITER · ALTITUDE 42.0°"
+            "HUBBLE SPACE TELESCOPE · ALTITUDE 30.5° · DISTANCE 540km"
         ]
     },
     "zh-Hans": {
         wait: "等待遥测数据...",
+        narrative: `你的上空，一颗属于${mockCelestialObject.constellationZhHans}的恒星正在发光，距离 ${mockCelestialObject.distanceLy} 光年。`,
         mock: [
+            `${mockCelestialObject.catalogId} · 高度角 ${mockCelestialObject.altitude}° · 天顶偏移 ${mockCelestialObject.zenithOffset}°`,
             "国际空间站 (ZARYA) · 仰角 45.2° · 距离 800km",
-            "星链-1234 · 仰角 60.1° · 距离 550km",
-            "哈勃空间望远镜 · 仰角 30.5° · 距离 540km",
-            "天狼星 (大犬座α) · 仰角 75.8°",
-            "木星 · 仰角 42.0°"
+            "哈勃空间望远镜 · 仰角 30.5° · 距离 540km"
         ]
     },
     "zh-Hant": {
         wait: "等待遙測數據...",
+        narrative: `你的上空，一顆屬於${mockCelestialObject.constellationZhHant}的恆星正在發光，距離 ${mockCelestialObject.distanceLy} 光年。`,
         mock: [
+            `${mockCelestialObject.catalogId} · 高度角 ${mockCelestialObject.altitude}° · 天頂偏移 ${mockCelestialObject.zenithOffset}°`,
             "國際太空站 (ZARYA) · 仰角 45.2° · 距離 800km",
-            "星鏈-1234 · 仰角 60.1° · 距離 550km",
-            "哈伯太空望遠鏡 · 仰角 30.5° · 距離 540km",
-            "天狼星 (大犬座α) · 仰角 75.8°",
-            "木星 · 仰角 42.0°"
+            "哈伯太空望遠鏡 · 仰角 30.5° · 距離 540km"
         ]
     },
     "ja": {
         wait: "テレメトリ待機中...",
+        narrative: `あなたの上空で、${mockCelestialObject.constellationJa}に属する恒星が光っています。距離は${mockCelestialObject.distanceLy}光年です。`,
         mock: [
+            `${mockCelestialObject.catalogId} · 高度 ${mockCelestialObject.altitude}° · 天頂オフセット ${mockCelestialObject.zenithOffset}°`,
             "国際宇宙ステーション (ZARYA) · 高度 45.2° · 距離 800km",
-            "スターリンク-1234 · 高度 60.1° · 距離 550km",
-            "ハッブル宇宙望遠鏡 · 高度 30.5° · 距離 540km",
-            "シリウス (おおいぬ座α星) · 高度 75.8°",
-            "木星 · 高度 42.0°"
+            "ハッブル宇宙望遠鏡 · 高度 30.5° · 距離 540km"
         ]
     }
 };
@@ -102,10 +111,17 @@ function updateClock() {
 }
 
 function updateMockSpaceData() {
+    const mainNarrative = document.getElementById("main-narrative");
     const metaInfo = document.getElementById("meta-info");
+    
     const lang = translations[currentConfig.language] ? currentConfig.language : "en";
     const dataList = translations[lang].mock;
+    const narrativeText = translations[lang].narrative;
     
+    // 更新主叙事文案
+    mainNarrative.textContent = narrativeText;
+    
+    // 更新底部技术行
     metaInfo.textContent = dataList[mockIndex];
     mockIndex = (mockIndex + 1) % dataList.length;
 }
