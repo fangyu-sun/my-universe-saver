@@ -39,8 +39,12 @@ class MyUniverseView: ScreenSaverView, WKNavigationDelegate {
         self.addSubview(newWebView)
         self.webView = newWebView
         
-        if let htmlURL = Bundle(for: MyUniverseView.self).url(forResource: "index", withExtension: "html", subdirectory: "Resources") {
+        let bundle = Bundle(for: MyUniverseView.self)
+        if let htmlURL = bundle.url(forResource: "index", withExtension: "html") {
+            NSLog("MyUniverse: Found HTML at \(htmlURL)")
             newWebView.loadFileURL(htmlURL, allowingReadAccessTo: htmlURL.deletingLastPathComponent())
+        } else {
+            NSLog("MyUniverse ERROR: Cannot find index.html in bundle!")
         }
     }
     
