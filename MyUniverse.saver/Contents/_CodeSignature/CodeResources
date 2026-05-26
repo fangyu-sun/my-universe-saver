@@ -20,6 +20,10 @@
 		<data>
 		jSlii/pAfS8K6zkzufklq31h2AQ=
 		</data>
+		<key>Resources/copywriter.js</key>
+		<data>
+		ojqTmLgtZG40nAW8/bYeaIaj5Do=
+		</data>
 		<key>Resources/data/constellations.js</key>
 		<data>
 		gkKpeHYcP2/zyj64/PAGNB9ODZ4=
@@ -38,11 +42,11 @@
 		</data>
 		<key>Resources/index.html</key>
 		<data>
-		oCD0VOeX7R7qEf1zUectIrypdz8=
+		pSkDvn1JXIiXFXLeEloKKu9+8rQ=
 		</data>
 		<key>Resources/main.js</key>
 		<data>
-		Yji4NOS5V9BOxrJDUlTjBo/Hrak=
+		CDtHS2GB6nI6KpMiTpR3BZ5E1c4=
 		</data>
 		<key>Resources/satellite.min.js</key>
 		<data>
@@ -74,6 +78,13 @@
 			<key>hash2</key>
 			<data>
 			5JOhyIqnRU3hgtRq2zPleVd0iicAMRuOs/8C2q+wOgg=
+			</data>
+		</dict>
+		<key>Resources/copywriter.js</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			EuQVgNXRcqYpGocsjH3UXEQiiHdaVhdg5stzWdkJNjk=
 			</data>
 		</dict>
 		<key>Resources/data/constellations.js</key>
@@ -108,14 +119,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			W0izhhX+wuUHBi5k/BqfcunjU7hmqLdaWZ2g5GjiK8A=
+			T2hLjONYyr89lxee3LMW4Mggzw86BRXQJGI8L200E7U=
 			</data>
 		</dict>
 		<key>Resources/main.js</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			uNeN/Mc0Yep4kuI+d7BrDw1xPBfZJRqyVqX5AkbATbs=
+			Z3n9yn7OGaCj4B/AuhJrJoOjHyl+tiS0xI4/zJMRHaQ=
 			</data>
 		</dict>
 		<key>Resources/satellite.min.js</key>

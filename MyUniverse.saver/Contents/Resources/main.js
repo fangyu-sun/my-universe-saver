@@ -72,63 +72,7 @@ function updateClock() {
     locationTimeInfo.textContent = parts.join(" · ");
 }
 
-window.generateCopy = function(obj, langCode) {
-    let name = obj.name;
-    let constellation = obj.constellation;
-    let distStr = "";
-    
-    if (obj.type === 'satellite') {
-        if (langCode === "zh-Hans" || langCode === "zh-Hant") {
-            return {
-                nav: `你的上空，一架名为 ${name} 的航天器正在静默掠过，距离 ${obj.rangeKm} km。`,
-                meta: `${name.toUpperCase()} · 高度角 ${obj.altitude}° · 方位角 ${obj.azimuth}°`
-            };
-        } else if (langCode === "ja") {
-            return {
-                nav: `あなたの上空で、${name} と呼ばれる宇宙船が静かに通過しています。距離 ${obj.rangeKm} km。`,
-                meta: `${name.toUpperCase()} · 高度 ${obj.altitude}° · 方位角 ${obj.azimuth}°`
-            };
-        } else {
-            return {
-                nav: `Above you, a spacecraft named ${name} is silently passing by, ${obj.rangeKm} km away.`,
-                meta: `${name.toUpperCase()} · ALTITUDE ${obj.altitude}° · AZIMUTH ${obj.azimuth}°`
-            };
-        }
-    } else {
-        if (langCode === "zh-Hans") {
-            name = obj.nameZhHans || obj.name;
-            constellation = obj.constellationZhHans || obj.constellation;
-            distStr = obj.distLy ? `距离 ${obj.distLy} 光年。` : "在我们的太阳系中。";
-            return {
-                nav: `你的上空，一颗属于${constellation}的恒星正在发光，${distStr}`,
-                meta: `${name.toUpperCase()} · 高度角 ${obj.altitude}° · 方位角 ${obj.azimuth}°`
-            };
-        } else if (langCode === "zh-Hant") {
-            name = obj.nameZhHant || obj.name;
-            constellation = obj.constellationZhHant || obj.constellation;
-            distStr = obj.distLy ? `距離 ${obj.distLy} 光年。` : "在我們的太陽系中。";
-            return {
-                nav: `你的上空，一顆屬於${constellation}的恆星正在發光，${distStr}`,
-                meta: `${name.toUpperCase()} · 高度角 ${obj.altitude}° · 方位角 ${obj.azimuth}°`
-            };
-        } else if (langCode === "ja") {
-            name = obj.nameJa || obj.name;
-            constellation = obj.constellationJa || obj.constellation;
-            distStr = obj.distLy ? `距離は${obj.distLy}光年です。` : "私たちの太陽系にあります。";
-            return {
-                nav: `あなたの上空で、${constellation}に属する恒星が光っています。${distStr}`,
-                meta: `${name.toUpperCase()} · 高度 ${obj.altitude}° · 方位角 ${obj.azimuth}°`
-            };
-        } else {
-            // English Default
-            distStr = obj.distLy ? `${obj.distLy} light-years away.` : "in our solar system.";
-            return {
-                nav: `Above you, a star in ${constellation} is shining, ${distStr}`,
-                meta: `${name.toUpperCase()} · ALTITUDE ${obj.altitude}° · AZIMUTH ${obj.azimuth}°`
-            };
-        }
-    }
-};
+// (window.generateCopy is now in copywriter.js)
 
 function updateMockSpaceData() {
     const mainCopy = document.getElementById("main-copy");
@@ -159,10 +103,28 @@ function updateMockSpaceData() {
     }
     
     const obj = currentCandidates[candidateIndex];
-    const copy = window.generateCopy(obj, currentConfig.language);
+    const copyStr = window.generateCopy(obj, currentConfig.language);
     
-    mainCopy.textContent = copy.nav;
-    metaInfo.textContent = copy.meta;
+    // Generate meta string manually (since copywriter only returns nav)
+    let metaStr = "";
+    let dispName = obj.nameJa || obj.nameZhHans || obj.name;
+    if (obj.isSatellite || obj.isPlanet) {
+        dispName = obj.name;
+    }
+    const cleanName = dispName ? dispName.toUpperCase() : "UNKNOWN";
+    const alt = obj.altitude || 0;
+    const az = obj.azimuth || 0;
+
+    if (currentConfig.language === "zh-Hans" || currentConfig.language === "zh-Hant") {
+        metaStr = `${cleanName} · 高度角 ${alt}° · 方位角 ${az}°`;
+    } else if (currentConfig.language === "ja") {
+        metaStr = `${cleanName} · 高度 ${alt}° · 方位角 ${az}°`;
+    } else {
+        metaStr = `${cleanName} · ALTITUDE ${alt}° · AZIMUTH ${az}°`;
+    }
+    
+    mainCopy.textContent = copyStr;
+    metaInfo.textContent = metaStr;
     
     candidateIndex++;
 }
