@@ -36,12 +36,10 @@ function applyConfig() {
     displayInterval = setInterval(updateClock, 1000);
     
     // 4. 重建宇宙播报循环 (与动画至暗时刻咬合)
-    let durationStr = "10s"; // normal
-    if (currentConfig.displayFrequency === "fast") durationStr = "3s";
-    if (currentConfig.displayFrequency === "slow") durationStr = "30s";
+    let durationSec = currentConfig.breathingCycle || 10.0;
     
     // 设置 CSS 呼吸周期
-    document.documentElement.style.setProperty('--breathe-duration', durationStr);
+    document.documentElement.style.setProperty('--breathe-duration', `${durationSec}s`);
     
     // 首次立即更新
     updateMockSpaceData();

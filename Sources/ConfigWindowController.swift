@@ -15,17 +15,27 @@ class ConfigWindowController: NSObject, NSComboBoxDelegate, NSComboBoxDataSource
     
     // UI Elements
     private let cityComboBox = NSComboBox()
+    private let autoLocateBtn = NSButton()
     private let manualLatField = NSTextField()
     private let manualLonField = NSTextField()
     private let languagePopUp = NSPopUpButton()
     private let brightnessSlider = NSSlider()
-    private let frequencyPopUp = NSPopUpButton()
-    private let showCityCheck = NSButton(checkboxWithTitle: "Show City", target: nil, action: nil)
-    private let showCoordsCheck = NSButton(checkboxWithTitle: "Show Coordinates", target: nil, action: nil)
-    private let showTimeCheck = NSButton(checkboxWithTitle: "Show Time", target: nil, action: nil)
+    private let breathingSlider = NSSlider()
+    private let breathingLabel = NSTextField()
+    
+    private let showCityCheck = NSButton(checkboxWithTitle: "Display Observer Location", target: nil, action: nil)
+    private let showTimeCheck = NSButton(checkboxWithTitle: "Display Local Time", target: nil, action: nil)
+    private let showCoordsCheck = NSButton(checkboxWithTitle: "Display Raw Coordinates", target: nil, action: nil)
     
     private var allCities: [CityData] = []
     private var filteredCities: [CityData] = []
+    
+    private let langMap: [(String, String)] = [
+        ("English", "en"),
+        ("简体中文", "zh-Hans"),
+        ("繁体中文", "zh-Hant"),
+        ("日本語", "ja")
+    ]
     
     override init() {
         super.init()
@@ -44,18 +54,23 @@ class ConfigWindowController: NSObject, NSComboBoxDelegate, NSComboBoxDataSource
     }
     
     private func setupWindow() {
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 400, height: 450),
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 450, height: 530),
                               styleMask: [.titled],
                               backing: .buffered,
                               defer: false)
-        window.title = "MyUniverse Options"
+        window.title = "MyUniverse Settings"
+        if #available(macOS 10.14, *) {
+            window.appearance = NSAppearance(named: .vibrantDark)
+        }
         
         let view = NSView(frame: window.contentView!.bounds)
         window.contentView = view
         
-        // --- City Search ---
-        createLabel(title: "City Search:", y: 400, view: view)
-        cityComboBox.frame = NSRect(x: 130, y: 400, width: 230, height: 24)
+        // --- 1. OBSERVER VANTAGE ---
+        createSectionTitle("OBSERVER VANTAGE", y: 480, view: view)
+        
+        createLabel(title: "Location:", y: 440, view: view)
+        cityComboBox.frame = NSRect(x: 130, y: 440, width: 200, height: 24)
         cityComboBox.usesDataSource = true
         cityComboBox.dataSource = self
         cityComboBox.delegate = self
@@ -63,72 +78,177 @@ class ConfigWindowController: NSObject, NSComboBoxDelegate, NSComboBoxDataSource
         cityComboBox.stringValue = LocationManager.shared.selectedCity
         view.addSubview(cityComboBox)
         
-        // --- Manual Coordinates ---
-        createLabel(title: "Manual Lat:", y: 360, view: view)
-        manualLatField.frame = NSRect(x: 130, y: 360, width: 100, height: 22)
+        autoLocateBtn.title = "Auto Locate"
+        autoLocateBtn.bezelStyle = .rounded
+        autoLocateBtn.frame = NSRect(x: 340, y: 438, width: 100, height: 28)
+        autoLocateBtn.target = self
+        autoLocateBtn.action = #selector(autoLocateClicked)
+        view.addSubview(autoLocateBtn)
+        
+        createLabel(title: "Lat / Lon:", y: 400, view: view)
+        manualLatField.frame = NSRect(x: 130, y: 400, width: 90, height: 22)
+        manualLatField.placeholderString = "Lat"
         manualLatField.stringValue = LocationManager.shared.manualLat
         view.addSubview(manualLatField)
         
-        createLabel(title: "Manual Lon:", y: 320, view: view)
-        manualLonField.frame = NSRect(x: 130, y: 320, width: 100, height: 22)
+        manualLonField.frame = NSRect(x: 230, y: 400, width: 90, height: 22)
+        manualLonField.placeholderString = "Lon"
         manualLonField.stringValue = LocationManager.shared.manualLon
         view.addSubview(manualLonField)
         
-        // --- Visual Settings ---
-        createLabel(title: "Language:", y: 280, view: view)
-        languagePopUp.frame = NSRect(x: 130, y: 280, width: 150, height: 24)
-        languagePopUp.addItems(withTitles: ["en", "zh-Hans", "zh-Hant", "ja"])
-        languagePopUp.selectItem(withTitle: LocationManager.shared.language)
+        // --- 2. RHYTHM & FLOW ---
+        createSectionTitle("RHYTHM & FLOW", y: 340, view: view)
+        
+        createLabel(title: "Breathing Cycle:", y: 300, view: view)
+        breathingSlider.frame = NSRect(x: 130, y: 300, width: 200, height: 24)
+        breathingSlider.minValue = 3.0
+        breathingSlider.maxValue = 30.0
+        breathingSlider.doubleValue = LocationManager.shared.breathingCycle
+        breathingSlider.target = self
+        breathingSlider.action = #selector(sliderChanged)
+        view.addSubview(breathingSlider)
+        
+        breathingLabel.frame = NSRect(x: 340, y: 300, width: 60, height: 20)
+        breathingLabel.isEditable = false
+        breathingLabel.isBordered = false
+        breathingLabel.drawsBackground = false
+        if #available(macOS 10.10, *) {
+            breathingLabel.textColor = .secondaryLabelColor
+        }
+        view.addSubview(breathingLabel)
+        updateBreathingLabel()
+        
+        // --- 3. AESTHETICS ---
+        createSectionTitle("AESTHETICS", y: 240, view: view)
+        
+        createLabel(title: "Language:", y: 200, view: view)
+        languagePopUp.frame = NSRect(x: 130, y: 200, width: 200, height: 24)
+        for map in langMap {
+            languagePopUp.addItem(withTitle: map.0)
+        }
+        let currentLangCode = LocationManager.shared.language
+        if let match = langMap.first(where: { $0.1 == currentLangCode }) {
+            languagePopUp.selectItem(withTitle: match.0)
+        }
         view.addSubview(languagePopUp)
         
-        createLabel(title: "Brightness:", y: 240, view: view)
-        brightnessSlider.frame = NSRect(x: 130, y: 240, width: 150, height: 24)
+        createLabel(title: "Luminance:", y: 160, view: view)
+        brightnessSlider.frame = NSRect(x: 130, y: 160, width: 200, height: 24)
         brightnessSlider.minValue = 0.2
         brightnessSlider.maxValue = 1.0
         brightnessSlider.doubleValue = LocationManager.shared.fontBrightness
         view.addSubview(brightnessSlider)
         
-        createLabel(title: "Frequency:", y: 200, view: view)
-        frequencyPopUp.frame = NSRect(x: 130, y: 200, width: 150, height: 24)
-        frequencyPopUp.addItems(withTitles: ["slow", "normal", "fast"])
-        frequencyPopUp.selectItem(withTitle: LocationManager.shared.displayFrequency)
-        view.addSubview(frequencyPopUp)
+        // --- 4. MINIMALISM ---
+        createSectionTitle("MINIMALISM", y: 100, view: view)
         
-        // --- Toggles ---
-        showCityCheck.frame = NSRect(x: 130, y: 160, width: 150, height: 22)
+        showCityCheck.frame = NSRect(x: 130, y: 65, width: 250, height: 22)
         showCityCheck.state = LocationManager.shared.showCity ? .on : .off
         view.addSubview(showCityCheck)
         
-        showCoordsCheck.frame = NSRect(x: 130, y: 130, width: 150, height: 22)
-        showCoordsCheck.state = LocationManager.shared.showCoordinates ? .on : .off
-        view.addSubview(showCoordsCheck)
-        
-        showTimeCheck.frame = NSRect(x: 130, y: 100, width: 150, height: 22)
+        showTimeCheck.frame = NSRect(x: 130, y: 40, width: 250, height: 22)
         showTimeCheck.state = LocationManager.shared.showTime ? .on : .off
         view.addSubview(showTimeCheck)
         
-        // --- Save Button ---
-        let saveButton = NSButton(title: "Save & Close", target: self, action: #selector(saveClicked))
-        saveButton.frame = NSRect(x: 150, y: 30, width: 120, height: 32)
+        showCoordsCheck.frame = NSRect(x: 130, y: 15, width: 250, height: 22)
+        showCoordsCheck.state = LocationManager.shared.showCoordinates ? .on : .off
+        view.addSubview(showCoordsCheck)
+        
+        // --- Buttons ---
+        let cancelButton = NSButton(title: "Cancel", target: self, action: #selector(cancelClicked))
+        cancelButton.frame = NSRect(x: 180, y: 10, width: 100, height: 32)
+        cancelButton.bezelStyle = .rounded
+        view.addSubview(cancelButton)
+        
+        let saveButton = NSButton(title: "Save & Apply", target: self, action: #selector(saveClicked))
+        saveButton.frame = NSRect(x: 290, y: 10, width: 120, height: 32)
+        saveButton.bezelStyle = .rounded
+        saveButton.keyEquivalent = "\r"
         view.addSubview(saveButton)
         
         self.configureSheet = window
+    }
+    
+    private func createSectionTitle(_ title: String, y: CGFloat, view: NSView) {
+        let label = NSTextField(labelWithString: title)
+        label.frame = NSRect(x: 30, y: y, width: 350, height: 20)
+        label.font = NSFont.boldSystemFont(ofSize: 13)
+        label.textColor = .white
+        view.addSubview(label)
+        
+        let box = NSBox(frame: NSRect(x: 30, y: y - 5, width: 390, height: 1))
+        box.boxType = .separator
+        view.addSubview(box)
     }
     
     private func createLabel(title: String, y: CGFloat, view: NSView) {
         let label = NSTextField(labelWithString: title)
         label.frame = NSRect(x: 20, y: y, width: 100, height: 20)
         label.alignment = .right
+        if #available(macOS 10.10, *) {
+            label.textColor = .secondaryLabelColor
+        }
         view.addSubview(label)
+    }
+    
+    @objc private func sliderChanged() {
+        updateBreathingLabel()
+    }
+    
+    private func updateBreathingLabel() {
+        let val = breathingSlider.doubleValue
+        breathingLabel.stringValue = String(format: "%.1fs", val)
+    }
+    
+    @objc private func autoLocateClicked() {
+        autoLocateBtn.isEnabled = false
+        autoLocateBtn.title = "Locating..."
+        
+        let url = URL(string: "https://ipwho.is/")!
+        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.autoLocateBtn.isEnabled = true
+                self.autoLocateBtn.title = "Auto Locate"
+                
+                if let data = data,
+                   let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let success = json["success"] as? Bool, success == true,
+                   let city = json["city"] as? String,
+                   let lat = json["latitude"] as? Double,
+                   let lon = json["longitude"] as? Double {
+                    
+                    self.cityComboBox.stringValue = city
+                    self.manualLatField.stringValue = String(format: "%.4f", lat)
+                    self.manualLonField.stringValue = String(format: "%.4f", lon)
+                } else {
+                    let alert = NSAlert()
+                    alert.messageText = "Locate Failed"
+                    alert.informativeText = "Could not fetch location from network."
+                    alert.runModal()
+                }
+            }
+        }.resume()
+    }
+    
+    @objc private func cancelClicked() {
+        if let window = configureSheet {
+            window.sheetParent?.endSheet(window)
+        }
     }
     
     @objc private func saveClicked() {
         let mgr = LocationManager.shared
         mgr.manualLat = manualLatField.stringValue
         mgr.manualLon = manualLonField.stringValue
-        mgr.language = languagePopUp.titleOfSelectedItem ?? "en"
+        
+        let selectedTitle = languagePopUp.titleOfSelectedItem ?? "English"
+        if let match = langMap.first(where: { $0.0 == selectedTitle }) {
+            mgr.language = match.1
+        }
+        
         mgr.fontBrightness = brightnessSlider.doubleValue
-        mgr.displayFrequency = frequencyPopUp.titleOfSelectedItem ?? "normal"
+        mgr.breathingCycle = breathingSlider.doubleValue
         mgr.showCity = showCityCheck.state == .on
         mgr.showCoordinates = showCoordsCheck.state == .on
         mgr.showTime = showTimeCheck.state == .on
@@ -143,7 +263,7 @@ class ConfigWindowController: NSObject, NSComboBoxDelegate, NSComboBoxDataSource
             mgr.cityLongitude = city.longitude
             mgr.timezone = city.timezone
         } else {
-            // User typed something unknown, just save the string
+            // User typed something unknown
             mgr.selectedCity = selectedName
         }
         
@@ -152,15 +272,14 @@ class ConfigWindowController: NSObject, NSComboBoxDelegate, NSComboBoxDataSource
         }
     }
     
-    // MARK: - NSComboBoxDataSource
+    // MARK: - NSComboBoxDataSource / Delegate
     func numberOfItems(in comboBox: NSComboBox) -> Int {
         return filteredCities.count
     }
     
     func comboBox(_ comboBox: NSComboBox, objectValueForItemAt index: Int) -> Any? {
         guard index < filteredCities.count else { return nil }
-        let c = filteredCities[index]
-        return "\(c.city)"
+        return filteredCities[index].city
     }
     
     func comboBox(_ comboBox: NSComboBox, completedString string: String) -> String? {
@@ -170,7 +289,6 @@ class ConfigWindowController: NSObject, NSComboBoxDelegate, NSComboBoxDataSource
         return nil
     }
     
-    // MARK: - NSComboBoxDelegate
     func controlTextDidChange(_ obj: Notification) {
         if let comboBox = obj.object as? NSComboBox {
             let search = comboBox.stringValue.lowercased()

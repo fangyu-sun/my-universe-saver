@@ -61,9 +61,12 @@ class LocationManager {
         set { defaults?.set(newValue, forKey: "fontBrightness"); defaults?.synchronize() }
     }
     
-    var displayFrequency: String {
-        get { return defaults?.string(forKey: "displayFrequency") ?? "normal" }
-        set { defaults?.set(newValue, forKey: "displayFrequency"); defaults?.synchronize() }
+    var breathingCycle: Double {
+        get { 
+            let val = defaults?.double(forKey: "breathingCycle") ?? 0.0
+            return val == 0.0 ? 10.0 : val
+        }
+        set { defaults?.set(newValue, forKey: "breathingCycle"); defaults?.synchronize() }
     }
     
     var showCoordinates: Bool {
@@ -103,7 +106,7 @@ class LocationManager {
             "timezone": timezone,
             "language": language,
             "fontBrightness": fontBrightness,
-            "displayFrequency": displayFrequency,
+            "breathingCycle": breathingCycle,
             "showCoordinates": showCoordinates,
             "showCity": showCity,
             "showTime": showTime
