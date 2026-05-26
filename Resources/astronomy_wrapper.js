@@ -1,4 +1,4 @@
-import { constellations } from './data/constellations.js';
+// constellations available via window.constellations
 
 let starData = [];
 let hygData = [];
@@ -6,7 +6,7 @@ let satelliteData = [];
 let dataLoaded = false;
 
 // 异步加载本地数据
-export async function initAstronomyData() {
+window.initAstronomyData = async function() {
     try {
         const [stars, hyg, sats] = await Promise.all([
             fetch('data/stars.json').then(r => r.json()),
@@ -24,7 +24,7 @@ export async function initAstronomyData() {
 }
 
 // 核心过滤推演算法
-export function getZenithCandidates(lat, lon, date) {
+window.getZenithCandidates = function(lat, lon, date) {
     if (!dataLoaded || typeof Astronomy === 'undefined' || typeof satellite === 'undefined') {
         return [];
     }
@@ -50,8 +50,8 @@ export function getZenithCandidates(lat, lon, date) {
                 // 星座翻译转换
                 let conKey = obj.con || obj.constellation; 
                 let dict = null;
-                if (conKey && constellations[conKey]) {
-                    dict = constellations[conKey];
+                if (conKey && window.constellations[conKey]) {
+                    dict = window.constellations[conKey];
                 }
 
                 candidates.push({

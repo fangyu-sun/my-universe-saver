@@ -1,4 +1,4 @@
-export const constellations = {
+window.constellations = {
     "And": { zh: "仙女座", en: "Andromeda", ja: "アンドロメダ座" },
     "Ant": { zh: "唧筒座", en: "Antlia", ja: "ポンプ座" },
     "Aps": { zh: "天燕座", en: "Apus", ja: "ふうちょう座" },

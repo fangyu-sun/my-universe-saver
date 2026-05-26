@@ -1,4 +1,4 @@
-import { initAstronomyData, getZenithCandidates } from './astronomy_wrapper.js';
+// globals available: window.initAstronomyData, window.getZenithCandidates
 
 let currentConfig = {
     city: "UNKNOWN",
@@ -78,7 +78,7 @@ function updateMockSpaceData() {
     // 实时计算当前头顶天体
     const now = new Date();
     // 每次迭代重新计算，以保证地球自转的实时性
-    currentCandidates = getZenithCandidates(currentConfig.lat, currentConfig.lon, now);
+    currentCandidates = window.getZenithCandidates(currentConfig.lat, currentConfig.lon, now);
     
     if (currentCandidates.length === 0) {
         // 兜底暗区文案
@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("meta-info").textContent = "LOADING DEEP SPACE CATALOGS...";
     
     // 初始化并加载海量星表数据与卫星数据
-    await initAstronomyData();
+    await window.initAstronomyData();
     
     isDataReady = true;
     
