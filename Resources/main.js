@@ -16,10 +16,16 @@ let displayInterval = null;
 let currentCandidates = [];
 let candidateIndex = 0;
 
+let isDataReady = false;
+
 // Expose updateConfig to global window object since we are in an ES module now
 window.updateConfig = function(config) {
     currentConfig = Object.assign(currentConfig, config);
-    applyConfig();
+    if (isDataReady) {
+        applyConfig();
+    } else {
+        window.pendingConfig = currentConfig;
+    }
 };
 
 function applyConfig() {
@@ -150,9 +156,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 初始化并加载海量星表数据与卫星数据
     await initAstronomyData();
     
-    // 数据加载完毕后，应用当前可能已收到的配置，或者恢复默认等待文案直到 Config 注入
-    document.getElementById("meta-info").textContent = "WAITING FOR TELEMETRY...";
+    isDataReady = true;
+    
+    if (window.pendingConfig) {
+        currentConfig = Object.assign(currentConfig, window.pendingConfig);
+        window.pendingConfig = null;
+    }
+    
     if (currentConfig.city !== "UNKNOWN") {
         applyConfig();
+    } else {
+        document.getElementById("meta-info").textContent = "WAITING FOR TELEMETRY...";
     }
 });

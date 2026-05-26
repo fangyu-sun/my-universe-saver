@@ -35,8 +35,16 @@
     <script src="astronomy.browser.min.js"></script>
     <script src="satellite.min.js"></script>
     
+    <!-- ES Module 加载前的配置缓冲 -->
+    <script>
+        window.pendingConfig = null;
+        window.updateConfig = function(config) {
+            window.pendingConfig = config;
+        };
+    </script>
+
     <!-- 加载核心播报逻辑 (使用 ES Module 以支持分离) -->
     <script type="module" src="astronomy_wrapper.js"></script>
-    <script type="module" src="main.js?v=20260526_4"></script>
+    <script type="module" src="main.js?v=20260526_5"></script>
 </body>
 </html>
