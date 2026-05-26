@@ -82,7 +82,7 @@ body, html {
     line-height: 1.5;
     letter-spacing: 2px;
     color: rgba(255, 255, 255, 0.9);
-    animation: breathe 8s infinite ease-in-out;
+    animation: breathe 10s infinite ease-in-out;
 }
 
 /* 底部：技术状态行 */
@@ -99,11 +99,14 @@ body, html {
 
 /* 动画效果 */
 @keyframes breathe {
-    0%, 100% { opacity: 0.7; transform: scale(0.98); }
-    50% { opacity: 1.0; transform: scale(1.0); }
+    0% { opacity: 0; filter: blur(4px); transform: scale(0.98); }
+    20% { opacity: 1; filter: blur(0px); transform: scale(1.0); }
+    80% { opacity: 1; filter: blur(0px); transform: scale(1.0); }
+    100% { opacity: 0; filter: blur(4px); transform: scale(1.02); }
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 0.5; box-shadow: 0 0 8px rgba(255,255,255,0.5); }
+    0% { opacity: 0; box-shadow: 0 0 0px rgba(255,255,255,0); }
     50% { opacity: 1.0; box-shadow: 0 0 20px rgba(255,255,255,1.0); }
+    100% { opacity: 0; box-shadow: 0 0 0px rgba(255,255,255,0); }
 }
