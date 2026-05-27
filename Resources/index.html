@@ -2,36 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- 确保在不同的屏幕和分辨率下，屏保的排版能够自适应，不可缩放 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyUniverse</title>
+    <!-- 加载主要的样式文件，通过追加版本号防止 WebKit 缓存旧的 CSS -->
     <link rel="stylesheet" href="style.css?v=20260526_2">
 </head>
 <body>
+    <!-- 整个屏保应用的挂载根节点 -->
     <div id="app">
+        <!-- 播报界面容器，默认赋予 active 类使其初始可见 -->
         <div id="broadcaster" class="screen active">
-            <!-- 顶部：地点与时间 -->
+            <!-- 顶部信息栏：展示观测者的城市名（或状态）、系统当前时间、以及经纬度坐标 -->
+            <!-- 例如："Beijing · 14:30 · 39.90, 116.41" -->
             <div id="location-time-info">-- · --:--</div>
             
-            <!-- 中间核心点缀 -->
+            <!-- 视觉焦点：位于屏幕中央的微小呼吸点，增添极简主义的深空氛围 -->
             <div class="zenith-dot"></div>
             
-            <!-- 中间：宇宙叙事主文案 -->
+            <!-- 核心文案区：动态展示诗意化的天体播报内容（支持多语言） -->
+            <!-- 例如："此刻，天狼星正在你的上空闪耀。" -->
             <h1 id="main-copy"></h1>
             
-            <!-- 底部：技术状态行 -->
+            <!-- 底部硬核数据栏：展示当前天体严谨的天文参数，配合主文案同步呼吸淡出淡入 -->
+            <!-- 初始化时显示为加载状态，后续会被替换为具体参数，例如："SIRIUS · 仰角 85.123° · 天顶偏角 4.877°" -->
             <div id="meta-info">WAITING FOR TELEMETRY...</div>
         </div>
     </div>
     
-    <!-- 加载离线天文与卫星引擎 -->
+    <!-- ================= 依赖库加载区 ================= -->
+    <!-- 1. 加载第三方离线天文核心引擎 (astronomy-engine) 和 卫星轨道计算引擎 (satellite.js) -->
+    <!-- 这些是被压缩过的基础物理库，为上层提供纯粹的数学坐标计算能力 -->
     <script src="astronomy.browser.min.js"></script>
     <script src="satellite.min.js"></script>
 
-    <!-- 加载核心播报逻辑 -->
+    <!-- ================= 核心业务代码加载区 ================= -->
+    <!-- 2. 依次加载我们的原生封装逻辑。加载顺序极其重要！ -->
+    
+    <!-- 加载 88 星座的数据结构与连线关系 -->
     <script src="data/constellations.js"></script>
+    
+    <!-- 加载卫星数据的定制处理逻辑 -->
     <script src="satellite_engine.js"></script>
+    
+    <!-- 核心天文封装层：包装 astronomy.browser.min.js，提供 getZenithCandidates 等获取头顶天体的高级接口 -->
     <script src="astronomy_wrapper.js"></script>
+    
+    <!-- 诗意文案生成器：根据天体类型和用户配置的语言，生成感性播报文字 -->
     <script src="copywriter.js"></script>
+    
+    <!-- 屏保主控制流：调度以上所有模块，负责配置解析、网络静默嗅探、定时器挂载以及 DOM 渲染 -->
+    <!-- 同样带上版本号，确保我们在本地开发调试时，不会被 Safari/WebKit 顽固的缓存机制困扰 -->
     <script src="main.js?v=20260526_6"></script>
 </body>
 </html>
